@@ -49,7 +49,7 @@ export default function RankingsPage() {
     return pages;
   };
 
-  const examColumns = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC'];
+  const examColumns = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC'];
 
   if (loading) {
     return <LoadingScreen />;

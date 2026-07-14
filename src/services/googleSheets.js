@@ -1,5 +1,5 @@
 const SHEET_ID = '1iLPmyCH2hxLr3YAylqnPgJ4qX4CJnOdX';
-const PC_SHEETS = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC'];
+const PC_SHEETS = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC'];
 const EP_SHEETS = ['1EP', '2EP'];
 const TALLER_SHEET = 'TALLER';
 
@@ -86,7 +86,7 @@ export async function fetchCareerData() {
 }
 
 export async function fetchAllData() {
-  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, ep1, ep2, taller] = await Promise.all([
+  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, taller] = await Promise.all([
     fetchSheet('PROMEDIOS_CEPRE'),
     fetchSheet('ARQUI'),
     fetchSheet('1PC'),
@@ -95,6 +95,7 @@ export async function fetchAllData() {
     fetchSheet('4PC'),
     fetchSheet('5PC'),
     fetchSheet('6PC'),
+    fetchSheet('7PC'),
     fetchSheet('1EP'),
     fetchSheet('2EP'),
     fetchSheet(TALLER_SHEET),
@@ -122,7 +123,7 @@ export async function fetchAllData() {
   const gCols = getColLabels(promedios);
   const gCodigoIdx = findColIndex(gCols, 'CODIGO');
   const gNombreIdx = findColIndex(gCols, 'NOMBRE');
-  const gExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC'];
+  const gExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC'];
   const gExamIdxs = gExamNames.map(name => findColIndex(gCols, name));
   const gPromIdx = findColIndex(gCols, 'PROMEDIO');
 
@@ -150,7 +151,7 @@ export async function fetchAllData() {
   const aCols = getColLabels(arqui);
   const aCodigoIdx = findColIndex(aCols, 'CODIGO');
   const aNombreIdx = findColIndex(aCols, 'NOMBRE');
-  const aExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC'];
+  const aExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC'];
   const aExamIdxs = aExamNames.map(name => findColIndex(aCols, name));
   const aTNotaCols = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'].map(name => findColIndex(aCols, name));
   const aPromIdx = findColIndex(aCols, 'PROMEDIO');
@@ -215,6 +216,7 @@ export async function fetchAllData() {
     { name: '4PC', table: pc4 },
     { name: '5PC', table: pc5 },
     { name: '6PC', table: pc6 },
+    { name: '7PC', table: pc7 },
   ];
 
   for (const exam of pcExamList) {
@@ -290,7 +292,7 @@ export async function fetchAllData() {
   students.forEach((s, i) => { s.rank = i + 1; });
 
   const examStats = {};
-  const allExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC'];
+  const allExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC'];
   for (const examName of allExamNames) {
     const scores = [];
     for (const s of students) {
@@ -310,7 +312,7 @@ export async function fetchAllData() {
   }
 
   const distributions = {};
-  const distExamNames = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '1EP', '2EP'];
+  const distExamNames = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC', '1EP', '2EP'];
   for (const examName of distExamNames) {
     const buckets = {};
     for (let i = 0; i <= 140; i += 10) {

@@ -1,24 +1,40 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext.jsx';
 
-const totalExams = 9;
+const examWeights = {
+  '1PC': 1, '2PC': 1, '3PC': 1, '4PC': 1,
+  '5PC': 1, '6PC': 1, '7PC': 1,
+  '1EP': 2, '2EP': 4, 'EF': 6, 'PAV': 1,
+};
 
-const examOrder = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC', '1EP', '2EP'];
+const examOrder = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC', '1EP', '2EP', 'EF', 'PAV'];
 
 function computeStudentStats(student) {
-  let sum = 0;
-  let count = 0;
+  let weightedSum = 0;
+  let totalWeightDone = 0;
   const pending = [];
+
   for (const name of examOrder) {
+    if (name === 'PAV' && !student.isArquitectura) continue;
+    const weight = examWeights[name];
     const nota = student.notas[name]?.nota;
     if (nota !== undefined) {
-      sum += nota;
-      count++;
+      weightedSum += nota * weight;
+      totalWeightDone += weight;
     } else {
-      pending.push(name);
+      pending.push({ name, weight });
     }
   }
-  return { currentSum: sum, currentCount: count, pending, currentAvg: count > 0 ? sum / count : 0 };
+
+  const totalWeight = student.isArquitectura ? 20 : 19;
+  return {
+    weightedSum,
+    totalWeightDone,
+    totalWeight,
+    pending,
+    currentWAvg: totalWeightDone > 0 ? weightedSum / totalWeightDone : 0,
+    remainingWeight: totalWeight - totalWeightDone,
+  };
 }
 
 export default function GoalCalculator({ student }) {
@@ -30,14 +46,13 @@ export default function GoalCalculator({ student }) {
   const [simValues, setSimValues] = useState({});
 
   const stats = useMemo(() => computeStudentStats(student), [student]);
-  const { currentSum, currentCount, pending, currentAvg } = stats;
+  const { weightedSum, totalWeightDone, totalWeight, pending, currentWAvg, remainingWeight } = stats;
 
   const career = careers.find(c => c.name === selectedCareer);
   const target = career?.target || 0;
-  const remaining = totalExams - currentCount;
 
-  const requiredAvg = remaining > 0 && target > 0
-    ? ((target * totalExams) - currentSum) / remaining
+  const requiredAvg = remainingWeight > 0 && target > 0
+    ? ((target * totalWeight) - weightedSum) / remainingWeight
     : 0;
 
   const handleSimChange = (exam, value) => {
@@ -46,25 +61,22 @@ export default function GoalCalculator({ student }) {
 
   let projectedAvg = 0;
   if (mode === 'simular') {
-    let simSum = 0;
-    let simCount = 0;
-    for (const name of examOrder) {
-      const real = student.notas[name]?.nota;
-      if (real !== undefined) {
-        simSum += real;
-        simCount++;
-      } else if (simValues[name] !== undefined && simValues[name] !== '') {
-        const v = parseFloat(simValues[name]);
-        if (!isNaN(v)) {
-          simSum += v;
-          simCount++;
+    let simSum = weightedSum;
+    let simWeight = totalWeightDone;
+    for (const { name, weight } of pending) {
+      const v = simValues[name];
+      if (v !== undefined && v !== '') {
+        const parsed = parseFloat(v);
+        if (!isNaN(parsed)) {
+          simSum += parsed * weight;
+          simWeight += weight;
         }
       }
     }
-    if (simCount > 0) projectedAvg = simSum / totalExams;
+    if (simWeight > 0) projectedAvg = simSum / totalWeight;
   }
 
-  const isOnTrack = target > 0 && currentAvg >= target;
+  const isOnTrack = target > 0 && currentWAvg >= target;
 
   if (careers.length === 0) return null;
 
@@ -99,24 +111,37 @@ export default function GoalCalculator({ student }) {
               <span className="goal-stat-value goal-target">{target.toFixed(2)}</span>
             </div>
             <div className="goal-stat">
-              <span className="goal-stat-label">TU PROMEDIO</span>
+              <span className="goal-stat-label">TU PROM. POND.</span>
               <span className={`goal-stat-value ${isOnTrack ? 'goal-on-track' : 'goal-behind'}`}>
-                {currentAvg.toFixed(2)}
+                {currentWAvg.toFixed(2)}
               </span>
             </div>
             <div className="goal-stat">
-              <span className="goal-stat-label">EXÁMENES RESTANTES</span>
-              <span className="goal-stat-value goal-neutral">{remaining}</span>
+              <span className="goal-stat-label">PESO RESTANTE</span>
+              <span className="goal-stat-value goal-neutral">{remainingWeight}</span>
             </div>
           </div>
 
-          {remaining > 0 && !isOnTrack && (
+          {pending.length > 0 && (
+            <div className="goal-pending-list">
+              <span className="goal-pending-label">Ex&aacute;menes pendientes:</span>
+              <div className="goal-pending-exams">
+                {pending.map(({ name, weight }) => (
+                  <span key={name} className="goal-pending-badge">
+                    {name} <small>×{weight}</small>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {remainingWeight > 0 && !isOnTrack && (
             <div className="goal-required">
               <span className="goal-required-label">Necesitas promedio de</span>
               <span className="goal-required-value">
                 {requiredAvg > 0 ? requiredAvg.toFixed(2) : '—'}
               </span>
-              <span className="goal-required-label">en los {remaining} exámenes restantes</span>
+              <span className="goal-required-label">en los ex&aacute;menes restantes</span>
             </div>
           )}
 
@@ -141,9 +166,11 @@ export default function GoalCalculator({ student }) {
 
           {mode === 'simular' && pending.length > 0 && (
             <div className="goal-sim-grid">
-              {pending.map(name => (
+              {pending.map(({ name, weight }) => (
                 <div key={name} className="goal-sim-input-group">
-                  <label className="goal-sim-label">{name}</label>
+                  <label className="goal-sim-label">
+                    {name} <small>(×{weight})</small>
+                  </label>
                   <input
                     className="goal-sim-input"
                     type="number"
