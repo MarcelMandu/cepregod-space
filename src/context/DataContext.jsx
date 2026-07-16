@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { fetchAllData } from '../services/googleSheets.js';
 
 const DataContext = createContext(null);
@@ -8,24 +8,27 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const result = await fetchAllData();
-        if (!cancelled) setData(result);
-      } catch (err) {
-        if (!cancelled) setError(err.message || 'Error al cargar datos');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await fetchAllData();
+      setData(result);
+    } catch (err) {
+      setError(err.message || 'Error al cargar datos');
+    } finally {
+      setLoading(false);
     }
-    load();
-    return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!cancelled) load();
+    return () => { cancelled = true; };
+  }, [load]);
+
   return (
-    <DataContext.Provider value={{ data, loading, error }}>
+    <DataContext.Provider value={{ data, loading, error, retry: load }}>
       {children}
     </DataContext.Provider>
   );

@@ -1,10 +1,11 @@
 import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen.jsx';
+import ErrorScreen from '../components/ErrorScreen.jsx';
 import { useData } from '../context/DataContext.jsx';
 
 export default function BuscarPage() {
-  const { data, loading, error } = useData();
+  const { data, loading, error, retry } = useData();
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const inputRef = useRef(null);
@@ -24,18 +25,7 @@ export default function BuscarPage() {
   }
 
   if (error) {
-    return (
-      <div className="dashboard">
-        <div className="error-card">
-          <span className="error-icon">⚠️</span>
-          <h3>Error al cargar datos</h3>
-          <p>{error}</p>
-          <button className="btn-primary" onClick={() => window.location.reload()}>
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorScreen message={error} onRetry={retry} />;
   }
 
   return (

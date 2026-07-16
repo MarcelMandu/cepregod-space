@@ -4,10 +4,11 @@ import { useData } from '../context/DataContext.jsx';
 import { BarChart, EvolutionChart } from '../components/Charts.jsx';
 import GoalCalculator from '../components/GoalCalculator.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
+import ErrorScreen from '../components/ErrorScreen.jsx';
 
 export default function StudentGrades() {
   const { codigo } = useParams();
-  const { data, loading } = useData();
+  const { data, loading, error, retry } = useData();
   const [copied, setCopied] = useState(false);
 
   const student = useMemo(() => {
@@ -18,6 +19,7 @@ export default function StudentGrades() {
   const examStats = data?.examStats || {};
 
   if (loading) return <LoadingScreen />;
+  if (error) return <ErrorScreen message={error} onRetry={retry} />;
   if (!student) return <Navigate to="/" replace />;
 
   const pcExams = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC'];

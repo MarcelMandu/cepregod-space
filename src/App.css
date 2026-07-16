@@ -143,6 +143,33 @@
     transform: rotate(360deg);
   }
 }
+
+.error-icon {
+  font-size: 2.5rem;
+  color: #FF0033;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(255, 0, 51, 0.5);
+}
+
+.error-retry-btn {
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: var(--accent-red);
+  color: var(--text-main);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.error-retry-btn:hover {
+  background: #cc0029;
+  box-shadow: 0 0 12px rgba(255, 0, 51, 0.4);
+}
+
 /* Error card */
 .error-card {
   background: var(--card);

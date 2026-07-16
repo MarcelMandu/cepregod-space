@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext.jsx';
+import ErrorScreen from '../components/ErrorScreen.jsx';
 import { DistributionChart } from '../components/Charts.jsx';
 import CountdownCard from '../components/CountdownCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 
 export default function Dashboard() {
-  const { data, loading, error } = useData();
+  const { data, loading, error, retry } = useData();
   const navigate = useNavigate();
 
   const rankingGeneral = useMemo(() => {
@@ -31,18 +32,7 @@ export default function Dashboard() {
   }
 
   if (error) {
-    return (
-      <div className="dashboard">
-        <div className="error-card">
-          <span className="error-icon">⚠️</span>
-          <h3>Error al cargar datos</h3>
-          <p>{error}</p>
-          <button className="btn-primary" onClick={() => window.location.reload()}>
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorScreen message={error} onRetry={retry} />;
   }
 
   return (
