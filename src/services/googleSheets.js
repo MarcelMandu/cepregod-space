@@ -85,7 +85,7 @@ export async function fetchCareerData() {
   return careers;
 }
 
-export async function fetchAllData() {
+export async function fetchTablesJSONP() {
   const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, taller] = await Promise.all([
     fetchSheet('PROMEDIOS_CEPRE'),
     fetchSheet('ARQUI'),
@@ -100,6 +100,11 @@ export async function fetchAllData() {
     fetchSheet('2EP'),
     fetchSheet(TALLER_SHEET),
   ]);
+  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, taller };
+}
+
+export function processTables(tables) {
+  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, taller } = tables;
 
   const studentMap = new Map();
 
@@ -353,7 +358,12 @@ export async function fetchAllData() {
   }
   distributions['TALLER'] = tallerBuckets;
 
-  const careers = await fetchCareerData();
+  return { students, examStats, distributions };
+}
 
-  return { students, examStats, distributions, careers };
+export async function fetchAllData() {
+  const tables = await fetchTablesJSONP();
+  const data = processTables(tables);
+  const careers = await fetchCareerData();
+  return { ...data, careers };
 }

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { fetchAllData } from '../services/googleSheets.js';
+import { fetchFromAPI } from '../services/apiService.js';
 
 const DataContext = createContext(null);
 
@@ -12,7 +12,7 @@ export function DataProvider({ children }) {
     setLoading(true);
     setError('');
     try {
-      const result = await fetchAllData();
+      const result = await fetchFromAPI();
       setData(result);
     } catch (err) {
       setError(err.message || 'Error al cargar datos');
