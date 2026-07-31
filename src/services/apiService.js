@@ -3,7 +3,7 @@ import { processTables, fetchTablesJSONP, fetchCareerData } from './googleSheets
 export async function fetchFromAPI() {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
     const res = await fetch('/api/data', { signal: controller.signal });
     clearTimeout(timeout);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
