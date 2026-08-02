@@ -25,6 +25,7 @@ export default function StudentGrades() {
   const pcExams = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC'];
   const epExams = ['1EP', '2EP'];
   const efExams = ['EF'];
+  const pavExams = ['PAV'];
 
   const allNotas = [];
   let total = 0;
@@ -75,6 +76,26 @@ export default function StudentGrades() {
     const nota = student.notas[name]?.nota;
     const puntaje = student.notas[name]?.puntaje;
     efGrades.push({
+      name,
+      nota,
+      puntaje,
+      avg: examStats[name]?.avg,
+      max: examStats[name]?.max,
+      min: examStats[name]?.min,
+      pendiente: nota === undefined
+    });
+    if (nota !== undefined) {
+      allNotas.push({ name, nota, avg: examStats[name]?.avg });
+      total += nota;
+      count++;
+    }
+  }
+
+  const pavGrades = [];
+  for (const name of pavExams) {
+    const nota = student.notas[name]?.nota;
+    const puntaje = student.notas[name]?.puntaje;
+    pavGrades.push({
       name,
       nota,
       puntaje,
@@ -338,6 +359,70 @@ export default function StudentGrades() {
                         <span className="td-pendiente">—</span>
                       ) : g.puntaje !== null && g.puntaje !== undefined ? (
                         <span className={g.puntaje >= 75 ? 'grade-pass' : 'grade-fail'}>{g.puntaje.toFixed(2)}</span>
+                      ) : (
+                        '-'
+                      )}
+                    </td>
+                    <td className="td-num">{g.avg?.toFixed(2) || '-'}</td>
+                    <td className="td-num">{g.max?.toFixed(2) || '-'}</td>
+                    <td className="td-num">{g.min?.toFixed(2) || '-'}</td>
+                    <td className="td-num">
+                      {g.pendiente ? '-' : g.avg ? (
+                        <span className={g.nota >= g.avg ? 'badge-up' : 'badge-down'}>
+                          {g.nota >= g.avg ? '▲ Sobre promedio' : '▼ Bajo promedio'}
+                        </span>
+                      ) : '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </section>
+      )}
+
+      {student.isArquitectura && pavGrades.length > 0 && (
+        <section className="grade-section">
+          <h3 className="section-title">
+            Aptitud Vocacional (PAV)
+            <span className="section-count">{pavGrades.filter(g => !g.pendiente).length}/{pavGrades.length} exámenes</span>
+          </h3>
+          <div className="chart-card chart-card-ef">
+            <BarChart data={pavGrades.filter(g => !g.pendiente)} title="Aptitud Vocacional" compare={true} barColor="#BD00FF" />
+          </div>
+          <div className="data-table-card table-card-ef">
+          <div className="table-wrapper">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Examen</th>
+                  <th>Nota (0-20)</th>
+                  <th>Puntaje (0-200)</th>
+                  <th>Promedio</th>
+                  <th>Máx</th>
+                  <th>Mín</th>
+                  <th>Rendimiento</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pavGrades.map(g => (
+                  <tr key={g.name}>
+                    <td className="td-exam">{g.name}</td>
+                    <td className="td-num">
+                      {g.pendiente ? (
+                        <span className="td-pendiente">Pendiente</span>
+                      ) : (
+                        <span className={g.nota >= 10 ? 'grade-pass' : 'grade-fail'}>
+                          {g.nota.toFixed(2)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="td-num">
+                      {g.pendiente ? (
+                        <span className="td-pendiente">—</span>
+                      ) : g.puntaje !== null && g.puntaje !== undefined ? (
+                        <span className={g.puntaje >= 100 ? 'grade-pass' : 'grade-fail'}>{g.puntaje.toFixed(2)}</span>
                       ) : (
                         '-'
                       )}

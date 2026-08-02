@@ -35,7 +35,7 @@ async function fetchGviz(id, sheetName) {
 
 export default async function handler(req, res) {
   try {
-    const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller] = await Promise.all([
+    const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller] = await Promise.all([
       fetchGviz(SHEET_ID, 'PROMEDIOS_CEPRE'), fetchGviz(SHEET_ID, 'ARQUI'),
       fetchGviz(SHEET_ID, '1PC'), fetchGviz(SHEET_ID, '2PC'),
       fetchGviz(SHEET_ID, '3PC'), fetchGviz(SHEET_ID, '4PC'),
@@ -43,6 +43,7 @@ export default async function handler(req, res) {
       fetchGviz(SHEET_ID, '7PC'),
       fetchGviz(SHEET_ID, '1EP'), fetchGviz(SHEET_ID, '2EP'),
       fetchGviz(SHEET_ID, 'EF'),
+      fetchGviz(SHEET_ID, 'VC'),
       fetchGviz(SHEET_ID, 'TALLER'),
     ]);
 
@@ -59,7 +60,7 @@ export default async function handler(req, res) {
 
     res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
     res.json({
-      tables: { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller },
+      tables: { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller },
       careers,
     });
   } catch (err) {

@@ -2,6 +2,7 @@ const SHEET_ID = '1iLPmyCH2hxLr3YAylqnPgJ4qX4CJnOdX';
 const PC_SHEETS = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC'];
 const EP_SHEETS = ['1EP', '2EP'];
 const EF_SHEET = 'EF';
+const PAV_SHEET = 'VC';
 const TALLER_SHEET = 'TALLER';
 
 function getCell(row, colIndex) {
@@ -87,7 +88,7 @@ export async function fetchCareerData() {
 }
 
 export async function fetchTablesJSONP() {
-  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller] = await Promise.all([
+  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller] = await Promise.all([
     fetchSheet('PROMEDIOS_CEPRE'),
     fetchSheet('ARQUI'),
     fetchSheet('1PC'),
@@ -100,13 +101,14 @@ export async function fetchTablesJSONP() {
     fetchSheet('1EP'),
     fetchSheet('2EP'),
     fetchSheet(EF_SHEET),
+    fetchSheet(PAV_SHEET),
     fetchSheet(TALLER_SHEET),
   ]);
-  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller };
+  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller };
 }
 
 export function processTables(tables) {
-  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller } = tables;
+  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller } = tables;
 
   const studentMap = new Map();
 
@@ -271,6 +273,31 @@ export function processTables(tables) {
     }
   }
 
+  const pavCols = getColLabels(pav);
+  const pavCodigoIdx = findColIndex(pavCols, 'CODIGO');
+  const pavNotaIdx = findColIndex(pavCols, 'NOTA');
+  if (pavCodigoIdx !== -1 && pavNotaIdx !== -1) {
+    for (let i = 0; i < pav.rows.length; i++) {
+      const row = pav.rows[i];
+      const codigo = getCell(row, pavCodigoIdx);
+      if (!codigo) continue;
+      const c = String(codigo).trim();
+      if (!studentMap.has(c)) continue;
+      const s = studentMap.get(c);
+      if (!s.isArquitectura) continue;
+      const nota = getCell(row, pavNotaIdx);
+      if (nota !== null && !isNaN(Number(nota))) {
+        if (!s.notas.PAV) s.notas.PAV = {};
+        s.notas.PAV.nota = Number(nota);
+      }
+      const pavPuntajeIdx = pavNotaIdx - 1;
+      if (pavPuntajeIdx >= 0) {
+        const puntaje = getCell(row, pavPuntajeIdx);
+        addPuntaje(codigo, 'PAV', puntaje);
+      }
+    }
+  }
+
   const tallerCols = getColLabels(taller);
   const tallerCodigoIdx = findColIndex(tallerCols, 'CODIGO');
   const tPuntajeCols = [
@@ -323,7 +350,7 @@ export function processTables(tables) {
   students.forEach((s, i) => { s.rank = i + 1; });
 
   const examStats = {};
-  const allExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC', 'EF'];
+  const allExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC', 'EF', 'PAV'];
   for (const examName of allExamNames) {
     const scores = [];
     for (const s of students) {
@@ -343,17 +370,19 @@ export function processTables(tables) {
   }
 
   const distributions = {};
-  const distExamNames = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC', '1EP', '2EP', 'EF'];
+  const distExamNames = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC', '1EP', '2EP', 'EF', 'PAV'];
   for (const examName of distExamNames) {
     const buckets = {};
-    for (let i = 0; i <= 140; i += 10) {
-      buckets[`${i}-${i + 10}`] = 0;
+    const step = examName === 'PAV' ? 20 : 10;
+    const max = examName === 'PAV' ? 200 : 140;
+    for (let i = 0; i < max; i += step) {
+      buckets[`${i}-${i + step}`] = 0;
     }
     for (const s of students) {
       const p = s.notas[examName]?.puntaje;
       if (p !== undefined && p !== null && !isNaN(p)) {
-        const start = Math.min(Math.floor(p / 10) * 10, 140);
-        const key = `${start}-${start + 10}`;
+        const start = Math.min(Math.floor(p / step) * step, max - step);
+        const key = `${start}-${start + step}`;
         if (buckets[key] !== undefined) buckets[key]++;
       }
     }

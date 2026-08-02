@@ -25,7 +25,7 @@ export default function Dashboard() {
       .slice(0, 15);
   }, [data]);
 
-  const examColumns = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC', 'EF'];
+  const examColumns = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC', 'EF', 'PAV'];
 
   if (loading) {
     return <LoadingScreen />;
@@ -111,7 +111,7 @@ export default function Dashboard() {
                     <th>#</th>
                     <th>Código</th>
                     <th>Nombre</th>
-                    {['1PC','2PC','1EP','3PC','4PC','2EP','5PC','6PC','7PC','EF','T1','T2','T3','T4','T5','T6','ACUM'].map(col => (
+                    {['1PC','2PC','1EP','3PC','4PC','2EP','5PC','6PC','7PC','EF','PAV','T1','T2','T3','T4','T5','T6','ACUM'].map(col => (
                       <th key={col}>{col}</th>
                     ))}
                     <th>Prom.</th>
@@ -119,7 +119,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {rankingArquitectura.map(s => {
-                    const pcEP = ['1PC','2PC','1EP','3PC','4PC','2EP','5PC','6PC','7PC','EF'].map(col => s.notas[col]?.nota);
+                    const pcEP = ['1PC','2PC','1EP','3PC','4PC','2EP','5PC','6PC','7PC','EF','PAV'].map(col => s.notas[col]?.nota);
                     const tareas = s.taller?.tareas || [];
                     const tNotas = [1,2,3,4,5,6].map(i => {
                       const t = tareas.find(t => t.numero === i);
@@ -170,7 +170,7 @@ export default function Dashboard() {
           <div className="distrib-section">
             <h3>PARCIALES CEPRE UNI</h3>
             <div className="distrib-parciales">
-              {['1EP', '2EP', 'EF'].map(exam => {
+              {['1EP', '2EP', 'EF', 'PAV'].map(exam => {
                 const dist = data.distributions?.[exam];
                 return (
                   <div key={exam} className="distrib-card">
