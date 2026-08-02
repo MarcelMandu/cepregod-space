@@ -24,6 +24,7 @@ export default function StudentGrades() {
 
   const pcExams = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC'];
   const epExams = ['1EP', '2EP'];
+  const efExams = ['EF'];
 
   const allNotas = [];
   let total = 0;
@@ -54,6 +55,26 @@ export default function StudentGrades() {
     const nota = student.notas[name]?.nota;
     const puntaje = student.notas[name]?.puntaje;
     epGrades.push({
+      name,
+      nota,
+      puntaje,
+      avg: examStats[name]?.avg,
+      max: examStats[name]?.max,
+      min: examStats[name]?.min,
+      pendiente: nota === undefined
+    });
+    if (nota !== undefined) {
+      allNotas.push({ name, nota, avg: examStats[name]?.avg });
+      total += nota;
+      count++;
+    }
+  }
+
+  const efGrades = [];
+  for (const name of efExams) {
+    const nota = student.notas[name]?.nota;
+    const puntaje = student.notas[name]?.puntaje;
+    efGrades.push({
       name,
       nota,
       puntaje,
@@ -237,6 +258,70 @@ export default function StudentGrades() {
               </thead>
               <tbody>
                 {epGrades.map(g => (
+                  <tr key={g.name}>
+                    <td className="td-exam">{g.name}</td>
+                    <td className="td-num">
+                      {g.pendiente ? (
+                        <span className="td-pendiente">Pendiente</span>
+                      ) : (
+                        <span className={g.nota >= 10 ? 'grade-pass' : 'grade-fail'}>
+                          {g.nota.toFixed(2)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="td-num">
+                      {g.pendiente ? (
+                        <span className="td-pendiente">—</span>
+                      ) : g.puntaje !== null && g.puntaje !== undefined ? (
+                        <span className={g.puntaje >= 75 ? 'grade-pass' : 'grade-fail'}>{g.puntaje.toFixed(2)}</span>
+                      ) : (
+                        '-'
+                      )}
+                    </td>
+                    <td className="td-num">{g.avg?.toFixed(2) || '-'}</td>
+                    <td className="td-num">{g.max?.toFixed(2) || '-'}</td>
+                    <td className="td-num">{g.min?.toFixed(2) || '-'}</td>
+                    <td className="td-num">
+                      {g.pendiente ? '-' : g.avg ? (
+                        <span className={g.nota >= g.avg ? 'badge-up' : 'badge-down'}>
+                          {g.nota >= g.avg ? '▲ Sobre promedio' : '▼ Bajo promedio'}
+                        </span>
+                      ) : '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </section>
+      )}
+
+      {efGrades.length > 0 && (
+        <section className="grade-section">
+          <h3 className="section-title">
+            Examen Final (EF)
+            <span className="section-count">{efGrades.filter(g => !g.pendiente).length}/{efGrades.length} exámenes</span>
+          </h3>
+          <div className="chart-card chart-card-ef">
+            <BarChart data={efGrades.filter(g => !g.pendiente)} title="Examen Final" compare={true} barColor="#BD00FF" />
+          </div>
+          <div className="data-table-card table-card-ef">
+          <div className="table-wrapper">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Examen</th>
+                  <th>Nota (0-20)</th>
+                  <th>Puntaje (0-150)</th>
+                  <th>Promedio</th>
+                  <th>Máx</th>
+                  <th>Mín</th>
+                  <th>Rendimiento</th>
+                </tr>
+              </thead>
+              <tbody>
+                {efGrades.map(g => (
                   <tr key={g.name}>
                     <td className="td-exam">{g.name}</td>
                     <td className="td-num">

@@ -1218,6 +1218,13 @@
   box-shadow: 0 0 10px rgba(189, 0, 255, 0.15);
 }
 
+.chart-card-ef {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-cyan);
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+}
+
 .chart-card-evolution {
   background: var(--bg-card);
   border: 1px solid var(--accent-cyan);
@@ -1240,6 +1247,11 @@
 .table-card-ep {
   border: 1px solid var(--accent-red);
   box-shadow: 0 0 10px rgba(255, 0, 51, 0.15);
+}
+
+.table-card-ef {
+  border: 1px solid var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
 }
 
 .data-table-card .data-table {

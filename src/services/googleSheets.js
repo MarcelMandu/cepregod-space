@@ -1,6 +1,7 @@
 const SHEET_ID = '1iLPmyCH2hxLr3YAylqnPgJ4qX4CJnOdX';
 const PC_SHEETS = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC'];
 const EP_SHEETS = ['1EP', '2EP'];
+const EF_SHEET = 'EF';
 const TALLER_SHEET = 'TALLER';
 
 function getCell(row, colIndex) {
@@ -86,7 +87,7 @@ export async function fetchCareerData() {
 }
 
 export async function fetchTablesJSONP() {
-  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, taller] = await Promise.all([
+  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller] = await Promise.all([
     fetchSheet('PROMEDIOS_CEPRE'),
     fetchSheet('ARQUI'),
     fetchSheet('1PC'),
@@ -98,13 +99,14 @@ export async function fetchTablesJSONP() {
     fetchSheet('7PC'),
     fetchSheet('1EP'),
     fetchSheet('2EP'),
+    fetchSheet(EF_SHEET),
     fetchSheet(TALLER_SHEET),
   ]);
-  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, taller };
+  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller };
 }
 
 export function processTables(tables) {
-  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, taller } = tables;
+  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, taller } = tables;
 
   const studentMap = new Map();
 
@@ -128,7 +130,7 @@ export function processTables(tables) {
   const gCols = getColLabels(promedios);
   const gCodigoIdx = findColIndex(gCols, 'CODIGO');
   const gNombreIdx = findColIndex(gCols, 'NOMBRE');
-  const gExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC'];
+  const gExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC', 'EF'];
   const gExamIdxs = gExamNames.map(name => findColIndex(gCols, name));
   const gPromIdx = findColIndex(gCols, 'PROMEDIO');
 
@@ -156,7 +158,7 @@ export function processTables(tables) {
   const aCols = getColLabels(arqui);
   const aCodigoIdx = findColIndex(aCols, 'CODIGO');
   const aNombreIdx = findColIndex(aCols, 'NOMBRE');
-  const aExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC'];
+  const aExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC', 'EF'];
   const aExamIdxs = aExamNames.map(name => findColIndex(aCols, name));
   const aTNotaCols = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'].map(name => findColIndex(aCols, name));
   const aPromIdx = findColIndex(aCols, 'PROMEDIO');
@@ -245,6 +247,30 @@ export function processTables(tables) {
     processPuntajeRows(exam.table.rows, exam.name, codigoIdx, notaIdx);
   }
 
+  const efCols = getColLabels(ef);
+  const efCodigoIdx = findColIndex(efCols, 'CODIGO');
+  const efNotaIdx = findColIndex(efCols, 'NOTA');
+  if (efCodigoIdx !== -1 && efNotaIdx !== -1) {
+    for (let i = 0; i < ef.rows.length; i++) {
+      const row = ef.rows[i];
+      const codigo = getCell(row, efCodigoIdx);
+      if (!codigo) continue;
+      const c = String(codigo).trim();
+      if (!studentMap.has(c)) continue;
+      const s = studentMap.get(c);
+      const nota = getCell(row, efNotaIdx);
+      if (nota !== null && !isNaN(Number(nota))) {
+        if (!s.notas.EF) s.notas.EF = {};
+        s.notas.EF.nota = Number(nota);
+      }
+      const efPuntajeIdx = efNotaIdx - 1;
+      if (efPuntajeIdx >= 0) {
+        const puntaje = getCell(row, efPuntajeIdx);
+        addPuntaje(codigo, 'EF', puntaje);
+      }
+    }
+  }
+
   const tallerCols = getColLabels(taller);
   const tallerCodigoIdx = findColIndex(tallerCols, 'CODIGO');
   const tPuntajeCols = [
@@ -297,7 +323,7 @@ export function processTables(tables) {
   students.forEach((s, i) => { s.rank = i + 1; });
 
   const examStats = {};
-  const allExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC'];
+  const allExamNames = ['1PC', '2PC', '1EP', '3PC', '4PC', '2EP', '5PC', '6PC', '7PC', 'EF'];
   for (const examName of allExamNames) {
     const scores = [];
     for (const s of students) {
@@ -317,7 +343,7 @@ export function processTables(tables) {
   }
 
   const distributions = {};
-  const distExamNames = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC', '1EP', '2EP'];
+  const distExamNames = ['1PC', '2PC', '3PC', '4PC', '5PC', '6PC', '7PC', '1EP', '2EP', 'EF'];
   for (const examName of distExamNames) {
     const buckets = {};
     for (let i = 0; i <= 140; i += 10) {
