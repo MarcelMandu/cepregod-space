@@ -20,8 +20,10 @@ function maskCode(codigo) {
   return codigo ? `••••${String(codigo).slice(-4)}` : '—';
 }
 
-function notaToVig(p) {
-  return p != null && !isNaN(p) ? (Number(p) / 2700) * 20 : null;
+function notaToVig(p, s) {
+  if (p == null || isNaN(p)) return null;
+  const max = s && s.isArquitectura ? 3701 : 2700;
+  return (Number(p) / max) * 20;
 }
 
 export default function PosicionesPage() {
@@ -179,7 +181,7 @@ export default function PosicionesPage() {
                       <td className="td-nombre">{item.student.nombre || '—'}</td>
                       <td className="td-codigo">{maskCode(item.student.codigo)}</td>
                       <td className="td-nota"><span className={isFirst ? 'pos-first-score' : ''}>{item.total.toFixed(2)}</span></td>
-                      <td className="td-nota">{notaToVig(item.total) != null ? notaToVig(item.total).toFixed(2) : '—'}</td>
+                      <td className="td-nota">{notaToVig(item.total, item.student) != null ? notaToVig(item.total, item.student).toFixed(2) : '—'}</td>
                       <td className="td-nota"><span className="pos-ingreso">✓ INGRESÓ</span></td>
                     </tr>
                   );
