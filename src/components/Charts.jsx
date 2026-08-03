@@ -100,7 +100,14 @@ export function BarChart({ data, title, compare, barColor }) {
     return () => { if (chartRef.current) chartRef.current.destroy(); };
   }, [data, title, compare]);
 
-  return <canvas ref={canvasRef}></canvas>;
+  const minWidth = Math.max(320, data.length * 90);
+  return (
+    <div className="bar-chart-scroll" style={{ overflowX: 'auto' }}>
+      <div style={{ minWidth, position: 'relative' }}>
+        <canvas ref={canvasRef}></canvas>
+      </div>
+    </div>
+  );
 }
 
 export function DistributionChart({ data, title, height = 180, color }) {
