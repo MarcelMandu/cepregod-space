@@ -312,6 +312,7 @@ export function processTables(tables) {
 
   const ingCols = getColLabels(ingresantes);
   const ingCodigoIdx = findColIndex(ingCols, 'CODIGO');
+  const ingNombreIdx = findColIndex(ingCols, 'NOMBRE');
   const ingCarreraIdx = findColIndex(ingCols, 'ESPECIALIDAD', 'CARRERA');
   const ingPuntajeIdx = findColIndex(ingCols, 'PUNTAJE');
   const ingPuestoIdx = findColIndex(ingCols, 'PUESTO');
@@ -333,6 +334,10 @@ export function processTables(tables) {
       }
       s.ingresado = carrera != null;
       if (carrera) s.carrera = carrera;
+      if (ingNombreIdx !== -1) {
+        const n = getCell(row, ingNombreIdx);
+        if (n) s.nombre = String(n).trim();
+      }
       if (ingPuntajeIdx !== -1) {
         const p = getCell(row, ingPuntajeIdx);
         if (p !== null && !isNaN(Number(p))) s.puntajeAcumulado = Number(p);

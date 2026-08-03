@@ -20,6 +20,10 @@ function maskCode(codigo) {
   return codigo ? `••••${String(codigo).slice(-4)}` : '—';
 }
 
+function notaToVig(p) {
+  return p != null && !isNaN(p) ? (Number(p) / 2700) * 20 : null;
+}
+
 export default function PosicionesPage() {
   const { data, loading, error, retry } = useData();
   const [query, setQuery] = useState('');
@@ -123,7 +127,7 @@ export default function PosicionesPage() {
                 >
                   <td className="td-rank">{i + 1}</td>
                   <td className="td-nombre">{c.name}</td>
-                  <td className="td-nota">{c.vacantes != null && c.vacantes > 0 ? c.vacantes : '-'}</td>
+                  <td className="td-nota">{c.count != null ? c.count : '-'}</td>
                   <td className="td-nota">
                     {c.maxPuntaje != null
                       ? <span className="pos-max">{c.maxPuntaje.toFixed(2)}</span>
@@ -146,21 +150,23 @@ export default function PosicionesPage() {
           <h3>
             {selectedCareer.maxPuntaje != null && <span className="pos-crown-icon">👑</span>}
             Cuadro de Posiciones — {selectedCareer.name}
-            <span className="section-count">{ingresantes.length} postulantes / {selectedCareer.vacantes != null && selectedCareer.vacantes > 0 ? selectedCareer.vacantes : '-'} vacantes</span>
+            <span className="section-count">{ingresantes.length} postulantes / {ingresantes.length} ingresantes</span>
           </h3>
           <div className="table-wrapper">
             <table className="ranking-table">
               <thead>
                 <tr>
                   <th>Puesto</th>
+                  <th>Nombre</th>
                   <th>Código/DNI</th>
                   <th>Puntaje Acumulado</th>
+                  <th>Nota Vigesimal</th>
                   <th>Estado</th>
                 </tr>
               </thead>
               <tbody>
                 {ingresantes.length === 0 && (
-                  <tr><td colSpan="4" className="td-empty">Aún no hay ingresantes publicados para esta carrera.</td></tr>
+                  <tr><td colSpan="6" className="td-empty">Aún no hay ingresantes publicados para esta carrera.</td></tr>
                 )}
                 {ingresantes.map((item, idx) => {
                   const isFirst = idx === 0;
@@ -170,8 +176,10 @@ export default function PosicionesPage() {
                       className={`ranking-row pos-entry ${isFirst ? 'pos-first' : ''}`}
                     >
                       <td className="td-rank">{isFirst ? <span className="pos-crown">👑</span> : idx + 1}</td>
+                      <td className="td-nombre">{item.student.nombre || '—'}</td>
                       <td className="td-codigo">{maskCode(item.student.codigo)}</td>
                       <td className="td-nota"><span className={isFirst ? 'pos-first-score' : ''}>{item.total.toFixed(2)}</span></td>
+                      <td className="td-nota">{notaToVig(item.total) != null ? notaToVig(item.total).toFixed(2) : '—'}</td>
                       <td className="td-nota"><span className="pos-ingreso">✓ INGRESÓ</span></td>
                     </tr>
                   );
@@ -182,7 +190,7 @@ export default function PosicionesPage() {
           {ingresantes.length > 0 && (
             <div className="pos-cut-line-wrap">
               <div className="pos-cut-line" />
-              <span className="pos-cut-label">Límite de vacantes ({selectedCareer.vacantes != null && selectedCareer.vacantes > 0 ? selectedCareer.vacantes : '-'})</span>
+              <span className="pos-cut-label">Límite de vacantes ({selectedCareer.count != null ? selectedCareer.count : '-'})</span>
             </div>
           )}
         </div>
