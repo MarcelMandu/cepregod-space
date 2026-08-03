@@ -4,18 +4,19 @@ const EP_SHEETS = ['1EP', '2EP'];
 const EF_SHEET = 'EF';
 const PAV_SHEET = 'VC';
 const TALLER_SHEET = 'TALLER';
-const INGRESANTES_SHEET = 'INGRESANTES';
+const INGRESANTES_SHEET = 'Ingresantescepre';
 
 function getCell(row, colIndex) {
   if (!row || !row.c || !row.c[colIndex]) return null;
   return row.c[colIndex].v ?? null;
 }
 
-function fetchSheetJSONP(sheetName, sheetId) {
+function fetchSheetJSONP(sheetName, sheetId, gid) {
   const id = sheetId || SHEET_ID;
   return new Promise((resolve, reject) => {
     const cb = `_gviz_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(sheetName)}`;
+    const sel = gid != null ? `gid=${encodeURIComponent(gid)}` : `sheet=${encodeURIComponent(sheetName)}`;
+    const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json;responseHandler:${cb}&${sel}`;
 
     window[cb] = (data) => {
       resolve(data.table);
@@ -43,9 +44,9 @@ function fetchSheetJSONP(sheetName, sheetId) {
 
 const fetchSheet = fetchSheetJSONP;
 
-async function fetchSheetTolerant(sheetName, sheetId) {
+async function fetchSheetTolerant(sheetName, sheetId, gid) {
   try {
-    return await fetchSheetJSONP(sheetName, sheetId);
+    return await fetchSheetJSONP(sheetName, sheetId, gid);
   } catch {
     return { cols: [], rows: [] };
   }
@@ -54,7 +55,7 @@ async function fetchSheetTolerant(sheetName, sheetId) {
 function findColIndex(cols, ...labels) {
   for (const label of labels) {
     const idx = cols.findIndex(
-      (c) => c.label?.toUpperCase() === label.toUpperCase()
+      (c) => `${c.label || ''}`.trim().toUpperCase() === label.trim().toUpperCase()
     );
     if (idx !== -1) return idx;
   }
@@ -97,7 +98,7 @@ export async function fetchCareerData() {
 }
 
 export async function fetchTablesJSONP() {
-  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes] = await Promise.all([
+  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes, resumen] = await Promise.all([
     fetchSheet('PROMEDIOS_CEPRE'),
     fetchSheet('ARQUI'),
     fetchSheet('1PC'),
@@ -113,12 +114,13 @@ export async function fetchTablesJSONP() {
     fetchSheet(PAV_SHEET),
     fetchSheet(TALLER_SHEET),
     fetchSheetTolerant(INGRESANTES_SHEET),
+    fetchSheetTolerant(null, SHEET_ID, 0),
   ]);
-  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes };
+  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes, resumen };
 }
 
 export function processTables(tables) {
-  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes = { cols: [], rows: [] } } = tables;
+  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes = { cols: [], rows: [] }, resumen = { cols: [], rows: [] } } = tables;
 
   const studentMap = new Map();
 
@@ -310,7 +312,9 @@ export function processTables(tables) {
 
   const ingCols = getColLabels(ingresantes);
   const ingCodigoIdx = findColIndex(ingCols, 'CODIGO');
-  const ingCarreraIdx = findColIndex(ingCols, 'CARRERA');
+  const ingCarreraIdx = findColIndex(ingCols, 'ESPECIALIDAD', 'CARRERA');
+  const ingPuntajeIdx = findColIndex(ingCols, 'PUNTAJE');
+  const ingPuestoIdx = findColIndex(ingCols, 'PUESTO');
   if (ingCodigoIdx !== -1) {
     for (let i = 0; i < ingresantes.rows.length; i++) {
       const row = ingresantes.rows[i];
@@ -319,12 +323,45 @@ export function processTables(tables) {
       const c = String(codigo).trim();
       if (!studentMap.has(c)) continue;
       const s = studentMap.get(c);
-      s.ingresado = true;
+      let carrera = null;
       if (ingCarreraIdx !== -1) {
-        const carrera = getCell(row, ingCarreraIdx);
-        if (carrera) s.carrera = String(carrera).trim();
+        const raw = getCell(row, ingCarreraIdx);
+        if (raw) {
+          const v = String(raw).trim();
+          if (v && v.toUpperCase() !== 'NO INGRESANTE') carrera = v;
+        }
+      }
+      s.ingresado = carrera != null;
+      if (carrera) s.carrera = carrera;
+      if (ingPuntajeIdx !== -1) {
+        const p = getCell(row, ingPuntajeIdx);
+        if (p !== null && !isNaN(Number(p))) s.puntajeAcumulado = Number(p);
+      }
+      if (ingPuestoIdx !== -1) {
+        const pu = getCell(row, ingPuestoIdx);
+        if (pu !== null && !isNaN(Number(pu))) s.puestoIngreso = Number(pu);
       }
     }
+  }
+
+  const resumenCols = getColLabels(resumen);
+  const rEspecialidadIdx = findColIndex(resumenCols, 'ESPECIALIDAD', 'CARRERA');
+  const rFacultadIdx = findColIndex(resumenCols, 'FACULTAD');
+  const rMinIdx = findColIndex(resumenCols, 'CEPREUNI MIN', 'MIN', 'PUNTAJE MIN');
+  const rMaxIdx = findColIndex(resumenCols, 'MAX', 'PUNTAJE MAX');
+  const careerResults = [];
+  for (let i = 0; i < resumen.rows.length; i++) {
+    const row = resumen.rows[i];
+    const name = rEspecialidadIdx !== -1 ? getCell(row, rEspecialidadIdx) : null;
+    if (!name) continue;
+    const minV = rMinIdx !== -1 ? getCell(row, rMinIdx) : null;
+    const maxV = rMaxIdx !== -1 ? getCell(row, rMaxIdx) : null;
+    careerResults.push({
+      name: String(name).trim(),
+      facultad: rFacultadIdx !== -1 ? (getCell(row, rFacultadIdx) || '') : '',
+      min: minV != null && !isNaN(Number(minV)) ? Number(minV) : null,
+      max: maxV != null && !isNaN(Number(maxV)) ? Number(maxV) : null,
+    });
   }
 
   const tallerCols = getColLabels(taller);
@@ -442,7 +479,7 @@ export function processTables(tables) {
   }
   distributions['TALLER'] = tallerBuckets;
 
-  return { students, examStats, distributions };
+  return { students, examStats, distributions, careerResults };
 }
 
 export async function fetchAllData() {

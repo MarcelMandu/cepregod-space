@@ -6,6 +6,7 @@ import ErrorScreen from '../components/ErrorScreen.jsx';
 const WEIGHTS = { '1PC': 1, '2PC': 1, '3PC': 1, '4PC': 1, '5PC': 1, '6PC': 1, '7PC': 1, '1EP': 2, '2EP': 4, 'EF': 6, 'PAV': 1 };
 
 function acumulado(s) {
+  if (s.puntajeAcumulado != null && !isNaN(s.puntajeAcumulado)) return s.puntajeAcumulado;
   let sum = 0;
   for (const [exam, weight] of Object.entries(WEIGHTS)) {
     if (exam === 'PAV' && !s.isArquitectura) continue;
@@ -25,21 +26,21 @@ export default function PosicionesPage() {
   const [selected, setSelected] = useState(null);
 
   const students = data?.students || [];
+  const careerResults = data?.careerResults || [];
   const careers = data?.careers || [];
 
   const careerStats = useMemo(() => {
-    return careers.map(c => {
-      const list = students.filter(s => s.ingresado === true && String(s.carrera || '').trim() === c.name);
-      const scores = list.map(s => acumulado(s));
+    return careerResults.map(cr => {
+      const list = students.filter(s => s.ingresado === true && String(s.carrera || '').trim() === cr.name);
       return {
-        ...c,
-        vacantes: c.target,
-        maxPuntaje: scores.length ? Math.max(...scores) : null,
-        minPuntaje: scores.length ? Math.min(...scores) : null,
+        ...cr,
+        vacantes: (careers.find(c => c.name === cr.name) || {}).target,
+        maxPuntaje: cr.max,
+        minPuntaje: cr.min,
         count: list.length,
       };
     });
-  }, [careers, students]);
+  }, [careerResults, careers, students]);
 
   const filtered = useMemo(() => {
     if (!query) return careerStats;
