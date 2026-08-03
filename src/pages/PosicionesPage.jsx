@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ErrorScreen from '../components/ErrorScreen.jsx';
@@ -28,6 +29,7 @@ function notaToVig(p, s) {
 
 export default function PosicionesPage() {
   const { data, loading, error, retry } = useData();
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(null);
 
@@ -176,6 +178,7 @@ export default function PosicionesPage() {
                     <tr
                       key={item.student.codigo}
                       className={`ranking-row pos-entry ${isFirst ? 'pos-first' : ''}`}
+                      onClick={() => navigate(`/student/${item.student.codigo}`)}
                     >
                       <td className="td-rank">{isFirst ? <span className="pos-crown">👑</span> : idx + 1}</td>
                       <td className="td-nombre">{item.student.nombre || '—'}</td>

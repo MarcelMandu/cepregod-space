@@ -1030,6 +1030,38 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.profile-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.7rem 1rem;
+  max-width: 520px;
+}
+
+.profile-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: #101114;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+}
+
+.profile-detail-label {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.profile-detail-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .profile-codigo {

@@ -177,15 +177,30 @@ export default function StudentGrades() {
             <span className="profile-codigo">{student.codigo}</span>
             {student.isArquitectura && <span className="profile-badge">ARQ</span>}
             {student.rank && <span className="profile-badge rank-badge">TOP {student.rank}</span>}
-            {student.ingresado === true && (
-              <div className="ingresado-block">
-                <span className="profile-badge profile-badge-ingresado">✓ INGRESANTE</span>
-                {student.carrera && <span className="ingresado-carrera">{student.carrera}</span>}
+          </div>
+          <div className="profile-details">
+            {student.puestoIngreso != null && (
+              <div className="profile-detail">
+                <span className="profile-detail-label">Puesto</span>
+                <span className="profile-detail-value">#{student.puestoIngreso}</span>
               </div>
             )}
-            {student.ingresado === false && (
-              <span className="profile-badge profile-badge-no">No ingresó</span>
+            {student.carrera && (
+              <div className="profile-detail">
+                <span className="profile-detail-label">Carrera</span>
+                <span className="profile-detail-value">{student.carrera}</span>
+              </div>
             )}
+            <div className="profile-detail">
+              <span className="profile-detail-label">Estado</span>
+              {student.ingresado === true ? (
+                <span className="profile-badge profile-badge-ingresado">✓ INGRESANTE</span>
+              ) : student.ingresado === false ? (
+                <span className="profile-badge profile-badge-no">No ingresó</span>
+              ) : (
+                <span className="profile-detail-value">—</span>
+              )}
+            </div>
           </div>
         </div>
         <div className="profile-score">
