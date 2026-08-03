@@ -272,7 +272,7 @@ export default function StudentGrades() {
                 {pcGrades.map(g => (
                   <tr key={g.name}>
                     <td className="td-exam">{g.name}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Nota">
                       {g.pendiente ? (
                         <span className="td-pendiente">Pendiente</span>
                       ) : (
@@ -281,7 +281,7 @@ export default function StudentGrades() {
                         </span>
                       )}
                     </td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Puntaje">
                       {g.pendiente ? (
                         <span className="td-pendiente">—</span>
                       ) : g.puntaje !== null && g.puntaje !== undefined ? (
@@ -290,10 +290,10 @@ export default function StudentGrades() {
                         '-'
                       )}
                     </td>
-                    <td className="td-num">{g.avg?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.max?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.min?.toFixed(2) || '-'}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Promedio">{g.avg?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Máx">{g.max?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Mín">{g.min?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Rendimiento">
                       {g.pendiente ? '-' : g.avg ? (
                         <span className={g.nota >= g.avg ? 'badge-up' : 'badge-down'}>
                           {g.nota >= g.avg ? '▲ Sobre promedio' : '▼ Bajo promedio'}
@@ -336,7 +336,7 @@ export default function StudentGrades() {
                 {epGrades.map(g => (
                   <tr key={g.name}>
                     <td className="td-exam">{g.name}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Nota">
                       {g.pendiente ? (
                         <span className="td-pendiente">Pendiente</span>
                       ) : (
@@ -345,7 +345,7 @@ export default function StudentGrades() {
                         </span>
                       )}
                     </td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Puntaje">
                       {g.pendiente ? (
                         <span className="td-pendiente">—</span>
                       ) : g.puntaje !== null && g.puntaje !== undefined ? (
@@ -354,10 +354,10 @@ export default function StudentGrades() {
                         '-'
                       )}
                     </td>
-                    <td className="td-num">{g.avg?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.max?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.min?.toFixed(2) || '-'}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Promedio">{g.avg?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Máx">{g.max?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Mín">{g.min?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Rendimiento">
                       {g.pendiente ? '-' : g.avg ? (
                         <span className={g.nota >= g.avg ? 'badge-up' : 'badge-down'}>
                           {g.nota >= g.avg ? '▲ Sobre promedio' : '▼ Bajo promedio'}
@@ -400,7 +400,7 @@ export default function StudentGrades() {
                 {efGrades.map(g => (
                   <tr key={g.name}>
                     <td className="td-exam">{g.name}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Nota">
                       {g.pendiente ? (
                         <span className="td-pendiente">Pendiente</span>
                       ) : (
@@ -409,7 +409,7 @@ export default function StudentGrades() {
                         </span>
                       )}
                     </td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Puntaje">
                       {g.pendiente ? (
                         <span className="td-pendiente">—</span>
                       ) : g.puntaje !== null && g.puntaje !== undefined ? (
@@ -418,10 +418,10 @@ export default function StudentGrades() {
                         '-'
                       )}
                     </td>
-                    <td className="td-num">{g.avg?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.max?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.min?.toFixed(2) || '-'}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Promedio">{g.avg?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Máx">{g.max?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Mín">{g.min?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Rendimiento">
                       {g.pendiente ? '-' : g.avg ? (
                         <span className={g.nota >= g.avg ? 'badge-up' : 'badge-down'}>
                           {g.nota >= g.avg ? '▲ Sobre promedio' : '▼ Bajo promedio'}
@@ -464,7 +464,7 @@ export default function StudentGrades() {
                 {pavGrades.map(g => (
                   <tr key={g.name}>
                     <td className="td-exam">{g.name}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Nota">
                       {g.pendiente ? (
                         <span className="td-pendiente">Pendiente</span>
                       ) : (
@@ -473,7 +473,7 @@ export default function StudentGrades() {
                         </span>
                       )}
                     </td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Puntaje">
                       {g.pendiente ? (
                         <span className="td-pendiente">—</span>
                       ) : g.puntaje !== null && g.puntaje !== undefined ? (
@@ -482,10 +482,10 @@ export default function StudentGrades() {
                         '-'
                       )}
                     </td>
-                    <td className="td-num">{g.avg?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.max?.toFixed(2) || '-'}</td>
-                    <td className="td-num">{g.min?.toFixed(2) || '-'}</td>
-                    <td className="td-num">
+                    <td className="td-num" data-label="Promedio">{g.avg?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Máx">{g.max?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Mín">{g.min?.toFixed(2) || '-'}</td>
+                    <td className="td-num" data-label="Rendimiento">
                       {g.pendiente ? '-' : g.avg ? (
                         <span className={g.nota >= g.avg ? 'badge-up' : 'badge-down'}>
                           {g.nota >= g.avg ? '▲ Sobre promedio' : '▼ Bajo promedio'}
@@ -537,8 +537,8 @@ export default function StudentGrades() {
                 {tallerGrades.map(t => (
                   <tr key={t.name}>
                     <td className="td-exam">{t.name}</td>
-                    <td className="td-num">{t.nota.toFixed(2)}</td>
-                    <td className="td-num">{t.puntaje !== null ? t.puntaje.toFixed(2) : '-'}</td>
+                    <td className="td-num" data-label="Nota">{t.nota.toFixed(2)}</td>
+                    <td className="td-num" data-label="Puntaje">{t.puntaje !== null ? t.puntaje.toFixed(2) : '-'}</td>
                   </tr>
                 ))}
               </tbody>
