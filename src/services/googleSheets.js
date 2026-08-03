@@ -4,6 +4,7 @@ const EP_SHEETS = ['1EP', '2EP'];
 const EF_SHEET = 'EF';
 const PAV_SHEET = 'VC';
 const TALLER_SHEET = 'TALLER';
+const INGRESANTES_SHEET = 'INGRESANTES';
 
 function getCell(row, colIndex) {
   if (!row || !row.c || !row.c[colIndex]) return null;
@@ -41,6 +42,14 @@ function fetchSheetJSONP(sheetName, sheetId) {
 }
 
 const fetchSheet = fetchSheetJSONP;
+
+async function fetchSheetTolerant(sheetName, sheetId) {
+  try {
+    return await fetchSheetJSONP(sheetName, sheetId);
+  } catch {
+    return { cols: [], rows: [] };
+  }
+}
 
 function findColIndex(cols, ...labels) {
   for (const label of labels) {
@@ -88,7 +97,7 @@ export async function fetchCareerData() {
 }
 
 export async function fetchTablesJSONP() {
-  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller] = await Promise.all([
+  const [promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes] = await Promise.all([
     fetchSheet('PROMEDIOS_CEPRE'),
     fetchSheet('ARQUI'),
     fetchSheet('1PC'),
@@ -103,12 +112,13 @@ export async function fetchTablesJSONP() {
     fetchSheet(EF_SHEET),
     fetchSheet(PAV_SHEET),
     fetchSheet(TALLER_SHEET),
+    fetchSheetTolerant(INGRESANTES_SHEET),
   ]);
-  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller };
+  return { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes };
 }
 
 export function processTables(tables) {
-  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller } = tables;
+  const { promedios, arqui, pc1, pc2, pc3, pc4, pc5, pc6, pc7, ep1, ep2, ef, pav, taller, ingresantes = { cols: [], rows: [] } } = tables;
 
   const studentMap = new Map();
 
@@ -294,6 +304,25 @@ export function processTables(tables) {
       if (pavPuntajeIdx >= 0) {
         const puntaje = getCell(row, pavPuntajeIdx);
         addPuntaje(codigo, 'PAV', puntaje);
+      }
+    }
+  }
+
+  const ingCols = getColLabels(ingresantes);
+  const ingCodigoIdx = findColIndex(ingCols, 'CODIGO');
+  const ingCarreraIdx = findColIndex(ingCols, 'CARRERA');
+  if (ingCodigoIdx !== -1) {
+    for (let i = 0; i < ingresantes.rows.length; i++) {
+      const row = ingresantes.rows[i];
+      const codigo = getCell(row, ingCodigoIdx);
+      if (!codigo) continue;
+      const c = String(codigo).trim();
+      if (!studentMap.has(c)) continue;
+      const s = studentMap.get(c);
+      s.ingresado = true;
+      if (ingCarreraIdx !== -1) {
+        const carrera = getCell(row, ingCarreraIdx);
+        if (carrera) s.carrera = String(carrera).trim();
       }
     }
   }
