@@ -104,6 +104,7 @@ export default function RankingsPage() {
                   <th key={col}>{col}</th>
                 ))}
                 <th>Prom.</th>
+                <th>Ing.</th>
               </tr>
             </thead>
             <tbody>
@@ -127,6 +128,9 @@ export default function RankingsPage() {
                         ? <span className={s.promedio >= 10 ? 'grade-pass' : 'grade-fail'}>{s.promedio.toFixed(1)}</span>
                         : <span className="td-pendiente">—</span>
                       }
+                    </td>
+                    <td className={s.ingresado === true ? 'td-ingresado' : 'td-no-ingresado'} title={s.carrera}>
+                      {s.ingresado === true ? '✓' : '—'}
                     </td>
                   </tr>
                 );

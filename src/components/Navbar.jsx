@@ -19,6 +19,9 @@ export default function Navbar() {
           <Link to="/buscar" className={`nav-link ${location.pathname === '/buscar' ? 'active' : ''}`}>
             Buscar
           </Link>
+          <Link to="/posiciones" className={`nav-link ${location.pathname === '/posiciones' ? 'active' : ''}`}>
+            Tabla de Posiciones
+          </Link>
         </div>
       </div>
     </nav>
