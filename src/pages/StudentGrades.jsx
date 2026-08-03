@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
+import confetti from 'canvas-confetti';
 import { useData } from '../context/DataContext.jsx';
 import { BarChart, EvolutionChart } from '../components/Charts.jsx';
 import GoalCalculator from '../components/GoalCalculator.jsx';
@@ -17,6 +18,36 @@ export default function StudentGrades() {
   }, [data, codigo]);
 
   const examStats = data?.examStats || {};
+
+  useEffect(() => {
+    if (student?.ingresado !== true) return;
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      angle: 60,
+      origin: { x: 0, y: 1 },
+      startVelocity: 55,
+    });
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      angle: 120,
+      origin: { x: 1, y: 1 },
+      startVelocity: 55,
+    });
+    const timer = setTimeout(() => {
+      confetti({
+        particleCount: 300,
+        spread: 360,
+        startVelocity: 45,
+        origin: { x: 0.5, y: 0.4 },
+        colors: ['#FFD700', '#FFC000', '#FFF8DC', '#FFE066', '#FF0033'],
+        scalar: 1.2,
+        ticks: 220,
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [student]);
 
   if (loading) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} onRetry={retry} />;
@@ -146,6 +177,15 @@ export default function StudentGrades() {
             <span className="profile-codigo">{student.codigo}</span>
             {student.isArquitectura && <span className="profile-badge">ARQ</span>}
             {student.rank && <span className="profile-badge rank-badge">TOP {student.rank}</span>}
+            {student.ingresado === true && (
+              <div className="ingresado-block">
+                <span className="profile-badge profile-badge-ingresado">✓ INGRESANTE</span>
+                {student.carrera && <span className="ingresado-carrera">{student.carrera}</span>}
+              </div>
+            )}
+            {student.ingresado === false && (
+              <span className="profile-badge profile-badge-no">No ingresó</span>
+            )}
           </div>
         </div>
         <div className="profile-score">

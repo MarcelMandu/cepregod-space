@@ -1048,6 +1048,34 @@
   letter-spacing: 0.03em;
 }
 
+.ingresado-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.profile-badge-ingresado {
+  background: linear-gradient(135deg, #1f9d55, #0f7a3d);
+  color: #eafff1;
+  border: 1px solid #34d399;
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+}
+
+.profile-badge-no {
+  background: #3a3a3f;
+  color: var(--text-muted);
+  border: 1px solid #555;
+}
+
+.ingresado-carrera {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-shadow: 0 0 8px rgba(255, 0, 51, 0.4);
+  letter-spacing: 0.02em;
+}
+
 .profile-score {
   text-align: center;
   background: #111215;
