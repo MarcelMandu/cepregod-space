@@ -122,7 +122,7 @@ export default function PosicionesPage() {
                 >
                   <td className="td-rank">{i + 1}</td>
                   <td className="td-nombre">{c.name}</td>
-                  <td className="td-nota">{c.vacantes != null ? c.vacantes : '—'}</td>
+                  <td className="td-nota">{c.vacantes != null && c.vacantes > 0 ? c.vacantes : '-'}</td>
                   <td className="td-nota">
                     {c.maxPuntaje != null
                       ? <span className="pos-max">{c.maxPuntaje.toFixed(2)}</span>
@@ -145,7 +145,7 @@ export default function PosicionesPage() {
           <h3>
             {selectedCareer.maxPuntaje != null && <span className="pos-crown-icon">👑</span>}
             Cuadro de Posiciones — {selectedCareer.name}
-            <span className="section-count">{ingresantes.length} postulantes / {selectedCareer.vacantes} vacantes</span>
+            <span className="section-count">{ingresantes.length} postulantes / {selectedCareer.vacantes != null && selectedCareer.vacantes > 0 ? selectedCareer.vacantes : '-'} vacantes</span>
           </h3>
           <div className="table-wrapper">
             <table className="ranking-table">
@@ -181,7 +181,7 @@ export default function PosicionesPage() {
           {ingresantes.length > 0 && (
             <div className="pos-cut-line-wrap">
               <div className="pos-cut-line" />
-              <span className="pos-cut-label">Límite de vacantes ({selectedCareer.vacantes})</span>
+              <span className="pos-cut-label">Límite de vacantes ({selectedCareer.vacantes != null && selectedCareer.vacantes > 0 ? selectedCareer.vacantes : '-'})</span>
             </div>
           )}
         </div>
