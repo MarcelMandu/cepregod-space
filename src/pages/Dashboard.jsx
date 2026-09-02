@@ -10,6 +10,19 @@ export default function Dashboard() {
   const { data, loading, error, retry } = useData();
   const navigate = useNavigate();
 
+  const stats = useMemo(() => {
+    if (!data?.students) return null;
+    const students = data.students;
+    const total = students.length;
+    const ingresados = students.filter(s => s.ingresado === true).length;
+    const tasa = total > 0 ? ((ingresados / total) * 100).toFixed(1) : '—';
+    const promedios = students.map(s => s.promedio).filter(p => p !== null && p !== undefined);
+    const promedioGeneral = promedios.length > 0
+      ? (promedios.reduce((a, b) => a + b, 0) / promedios.length).toFixed(2)
+      : '—';
+    return { total, ingresados, tasa, promedioGeneral };
+  }, [data]);
+
   const rankingGeneral = useMemo(() => {
     if (!data) return [];
     return [...data.students]
@@ -37,23 +50,48 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <div className="hero-section">
-        <div className="hero-left">
-          <h1 className="hero-title">
-            <span className="hero-ciclo">Ciclo Especial</span>
-            <span className="hero-cepre">CEPRE UNI 2026</span>
-          </h1>
-          <p className="hero-subtitle">
-            Análisis detallado de postulantes — Resultados en tiempo real de cada PC, Examen Parcial y Talleres de Arquitectura.
-          </p>
-          <p className="hero-note">
-            Estadísticas procesadas de los resultados de la preparación preuniversitaria UNI.
-          </p>
+      <section className="hero-center">
+        <h1 className="hero-center-title">
+          <span className="hero-center-ciclo">Ciclo Especial</span>
+          <span className="hero-center-cepre">CEPRE UNI 2026</span>
+        </h1>
+        <p className="hero-center-subtitle">
+          Análisis detallado de postulantes — Resultados en tiempo real de cada PC, Examen Parcial y Talleres de Arquitectura.
+        </p>
+        <p className="hero-center-note">
+          Estadísticas procesadas de los resultados de la preparación preuniversitaria UNI.
+        </p>
+      </section>
 
-        </div>
-        <div className="hero-right" />
-      </div>
-      <div className="hero-divider" />
+      <section className="stats-panel">
+        {stats ? (
+          <>
+            <div className="stat-card">
+              <span className="stat-card-label">POSTULANTES</span>
+              <span className="stat-card-value">{stats.total}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-card-label">PROMEDIO GENERAL</span>
+              <span className="stat-card-value">{stats.promedioGeneral}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-card-label">INGRESADOS</span>
+              <span className="stat-card-value stat-card-success">{stats.ingresados}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-card-label">TASA DE INGRESO</span>
+              <span className="stat-card-value stat-card-accent">{stats.tasa}%</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="stat-card"><span className="stat-card-label">POSTULANTES</span><span className="stat-card-value">—</span></div>
+            <div className="stat-card"><span className="stat-card-label">PROMEDIO GENERAL</span><span className="stat-card-value">—</span></div>
+            <div className="stat-card"><span className="stat-card-label">INGRESADOS</span><span className="stat-card-value">—</span></div>
+            <div className="stat-card"><span className="stat-card-label">TASA DE INGRESO</span><span className="stat-card-value">—</span></div>
+          </>
+        )}
+      </section>
 
       <CountdownCard />
 

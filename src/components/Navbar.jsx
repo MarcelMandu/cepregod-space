@@ -7,7 +7,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <span style={{color: '#FFFFFF'}}>Cepre</span><span style={{color: '#FF0033'}}>God</span>
+          <span className="brand-cepre">Cepre</span><span className="brand-god">God</span>
         </Link>
         <div className="navbar-links">
           <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
