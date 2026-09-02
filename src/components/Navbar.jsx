@@ -6,9 +6,12 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <Link to="/" className="navbar-brand">
-          <span className="brand-cepre">Cepre</span><span className="brand-god">God</span>
-        </Link>
+        <div className="navbar-left">
+          <Link to="/" className="navbar-brand">
+            <span className="brand-cepre">Cepre</span><span className="brand-god">God</span>
+          </Link>
+          <span className="navbar-badge">CEPRE UNI 2026</span>
+        </div>
         <div className="navbar-links">
           <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
             Dashboard
