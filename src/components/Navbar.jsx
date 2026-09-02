@@ -1,4 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+
+const links = [
+  { path: '/', label: 'Dashboard' },
+  { path: '/rankings', label: 'Rankings' },
+  { path: '/buscar', label: 'Buscar' },
+  { path: '/posiciones', label: 'Tabla de Posiciones' },
+];
 
 export default function Navbar() {
   const location = useLocation();
@@ -13,18 +21,18 @@ export default function Navbar() {
           <span className="navbar-badge">CEPRE UNI 2026</span>
         </div>
         <div className="navbar-links">
-          <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-            Dashboard
-          </Link>
-          <Link to="/rankings" className={`nav-link ${location.pathname === '/rankings' ? 'active' : ''}`}>
-            Rankings
-          </Link>
-          <Link to="/buscar" className={`nav-link ${location.pathname === '/buscar' ? 'active' : ''}`}>
-            Buscar
-          </Link>
-          <Link to="/posiciones" className={`nav-link ${location.pathname === '/posiciones' ? 'active' : ''}`}>
-            Tabla de Posiciones
-          </Link>
+          {links.map(({ path, label }) => (
+            <Link key={path} to={path} className={`nav-link ${location.pathname === path ? 'active' : ''}`}>
+              {location.pathname === path && (
+                <motion.div
+                  className="nav-pill"
+                  layoutId="active-pill-cepregod"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <span className="nav-link-text">{label}</span>
+            </Link>
+          ))}
         </div>
       </div>
     </nav>
