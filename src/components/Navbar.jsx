@@ -26,7 +26,7 @@ export default function Navbar() {
               {location.pathname === path && (
                 <motion.div
                   className="nav-pill"
-                  layoutId="active-pill-cepregod"
+                  layoutId="active-indicator"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
