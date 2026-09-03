@@ -6,7 +6,6 @@ const links = [
   { path: '/rankings', label: 'RANKINGS' },
   { path: '/buscar', label: 'BUSCAR' },
   { path: '/posiciones', label: 'TABLA DE POSICIONES' },
-  { path: '/evaluacion', label: 'EVALUACIÓN' },
 ];
 
 export default function Navbar() {

@@ -5,7 +5,6 @@ import RankingsPage from './pages/RankingsPage.jsx';
 import BuscarPage from './pages/BuscarPage.jsx';
 import StudentGrades from './pages/StudentGrades.jsx';
 import PosicionesPage from './pages/PosicionesPage.jsx';
-import EvaluacionPage from './pages/EvaluacionPage.jsx';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import './App.css';
@@ -21,7 +20,6 @@ export default function App() {
             <Route path="/rankings" element={<RankingsPage />} />
             <Route path="/buscar" element={<BuscarPage />} />
             <Route path="/posiciones" element={<PosicionesPage />} />
-            <Route path="/evaluacion" element={<EvaluacionPage />} />
             <Route path="/student/:codigo" element={<StudentGrades />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
