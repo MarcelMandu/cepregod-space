@@ -60,86 +60,18 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <CountdownCard />
-
-      <div className="eval-tabs">
-        {exams.map(exam => (
-          <button
-            key={exam}
-            className={`eval-tab ${selectedExam === exam ? 'active' : ''}`}
-            onClick={() => setSelectedExam(exam)}
-          >
-            {exam}
-          </button>
-        ))}
-      </div>
-
-      <div className="eval-metrics">
-        <div className="eval-metric-card">
-          <span className="eval-metric-label">PROMEDIO</span>
-          <span className="eval-metric-value">{evalStats ? evalStats.avg.toFixed(2) : '—'}</span>
-        </div>
-        <div className="eval-metric-card">
-          <span className="eval-metric-label">MÁXIMA</span>
-          <span className="eval-metric-value eval-metric-success">{evalStats ? evalStats.max.toFixed(1) : '—'}</span>
-        </div>
-        <div className="eval-metric-card">
-          <span className="eval-metric-label">MÍNIMA</span>
-          <span className="eval-metric-value eval-metric-danger">{evalStats ? evalStats.min.toFixed(1) : '—'}</span>
-        </div>
-        <div className="eval-metric-card">
-          <span className="eval-metric-label">EVALUADOS</span>
-          <span className="eval-metric-value">{evalStats ? evalStats.count : '—'}</span>
-        </div>
-      </div>
-
-      <div className="eval-chart">
-        <DistributionChart
-          data={distribution || {}}
-          title={`DISTRIBUCIÓN — ${selectedExam}`}
-          height={300}
-          color="#FF0033"
-        />
-      </div>
-
-      <div className="eval-top10">
-        <h3 className="eval-top10-title">TOP 10 — {selectedExam}</h3>
-        <div className="table-wrapper">
-          <table className="eval-top10-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>CÓDIGO</th>
-                <th>NOMBRE</th>
-                <th>ESPECIALIDAD</th>
-                <th>NOTA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {top10.map(s => (
-                <tr
-                  key={s.codigo}
-                  className="eval-top10-row"
-                  onClick={() => navigate(`/student/${s.codigo}`)}
-                >
-                  <td className="eval-td-puesto">{s.puesto}</td>
-                  <td className="eval-td-codigo">{s.codigo}</td>
-                  <td className="eval-td-nombre">{s.nombre}</td>
-                  <td className={`eval-td-especialidad ${s.especialidad === 'ARQUITECTURA' ? 'esp-arq' : 'esp-ing'}`}>
-                    {s.especialidad}
-                  </td>
-                  <td className="eval-td-nota">{s.nota.toFixed(1)}</td>
-                </tr>
-              ))}
-              {top10.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="eval-td-empty">No hay datos disponibles para esta evaluación</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <section className="hero-center">
+        <h1 className="hero-center-title">
+          <span className="hero-center-ciclo">Ciclo Especial</span>
+          <span className="hero-center-cepre">CEPRE UNI 2026</span>
+        </h1>
+        <p className="hero-center-subtitle">
+          Análisis detallado de postulantes — Resultados en tiempo real de cada PC, Examen Parcial y Talleres de Arquitectura.
+        </p>
+        <p className="hero-center-note">
+          Estadísticas procesadas de los resultados de la preparación preuniversitaria UNI.
+        </p>
+      </section>
 
       <div className="ranking-card">
         <h3>Ranking General — Top 15</h3>
@@ -254,6 +186,87 @@ export default function Dashboard() {
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <CountdownCard />
+
+      <div className="eval-tabs">
+        {exams.map(exam => (
+          <button
+            key={exam}
+            className={`eval-tab ${selectedExam === exam ? 'active' : ''}`}
+            onClick={() => setSelectedExam(exam)}
+          >
+            {exam}
+          </button>
+        ))}
+      </div>
+
+      <div className="eval-metrics">
+        <div className="eval-metric-card">
+          <span className="eval-metric-label">PROMEDIO</span>
+          <span className="eval-metric-value">{evalStats ? evalStats.avg.toFixed(2) : '—'}</span>
+        </div>
+        <div className="eval-metric-card">
+          <span className="eval-metric-label">MÁXIMA</span>
+          <span className="eval-metric-value eval-metric-success">{evalStats ? evalStats.max.toFixed(1) : '—'}</span>
+        </div>
+        <div className="eval-metric-card">
+          <span className="eval-metric-label">MÍNIMA</span>
+          <span className="eval-metric-value eval-metric-danger">{evalStats ? evalStats.min.toFixed(1) : '—'}</span>
+        </div>
+        <div className="eval-metric-card">
+          <span className="eval-metric-label">EVALUADOS</span>
+          <span className="eval-metric-value">{evalStats ? evalStats.count : '—'}</span>
+        </div>
+      </div>
+
+      <div className="eval-chart">
+        <DistributionChart
+          data={distribution || {}}
+          title={`DISTRIBUCIÓN — ${selectedExam}`}
+          height={300}
+          color="#FF0033"
+        />
+      </div>
+
+      <div className="eval-top10">
+        <h3 className="eval-top10-title">TOP 10 — {selectedExam}</h3>
+        <div className="table-wrapper">
+          <table className="eval-top10-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>CÓDIGO</th>
+                <th>NOMBRE</th>
+                <th>ESPECIALIDAD</th>
+                <th>NOTA</th>
+              </tr>
+            </thead>
+            <tbody>
+              {top10.map(s => (
+                <tr
+                  key={s.codigo}
+                  className="eval-top10-row"
+                  onClick={() => navigate(`/student/${s.codigo}`)}
+                >
+                  <td className="eval-td-puesto">{s.puesto}</td>
+                  <td className="eval-td-codigo">{s.codigo}</td>
+                  <td className="eval-td-nombre">{s.nombre}</td>
+                  <td className={`eval-td-especialidad ${s.especialidad === 'ARQUITECTURA' ? 'esp-arq' : 'esp-ing'}`}>
+                    {s.especialidad}
+                  </td>
+                  <td className="eval-td-nota">{s.nota.toFixed(1)}</td>
+                </tr>
+              ))}
+              {top10.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="eval-td-empty">No hay datos disponibles para esta evaluación</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
