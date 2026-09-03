@@ -2127,3 +2127,224 @@
   text-align: center;
   color: var(--text-muted);
 }
+
+/* Evaluación Page */
+.eval-page {
+  padding-top: 1rem;
+}
+
+.eval-tabs-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.eval-tab-group {
+  margin-bottom: 0.8rem;
+}
+
+.eval-tab-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.eval-tabs {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.eval-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.eval-tab {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.eval-tab:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.eval-tab.active {
+  background: rgba(255, 0, 51, 0.15);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.eval-metrics {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.eval-metric-card {
+  flex: 1;
+  min-width: 120px;
+  background: #121212;
+  border: 1px solid #2A2A2A;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.eval-metric-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.eval-metric-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+  line-height: 1.1;
+}
+
+.eval-metric-success {
+  color: var(--success);
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.eval-metric-danger {
+  color: var(--accent-red);
+  text-shadow: 0 0 8px rgba(255, 0, 51, 0.4);
+}
+
+.eval-chart {
+  margin-bottom: 1.5rem;
+}
+
+.eval-top10 {
+  margin-bottom: 1.5rem;
+}
+
+.eval-top10-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.8rem;
+}
+
+.eval-top10-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.eval-top10-table th {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.eval-top10-table td {
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.eval-top10-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.eval-top10-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.eval-td-puesto {
+  text-align: center;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.eval-td-codigo {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: #94A3B8;
+}
+
+.eval-td-nombre {
+  font-weight: 500;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eval-td-especialidad {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.esp-arq {
+  color: #BD00FF;
+}
+
+.esp-ing {
+  color: var(--accent-cyan);
+}
+
+.eval-td-nota {
+  text-align: center;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.eval-td-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 1.5rem 0.8rem !important;
+}
+
+@media (max-width: 768px) {
+  .eval-metrics {
+    gap: 0.5rem;
+  }
+
+  .eval-metric-card {
+    min-width: 0;
+    flex: 1 1 45%;
+    padding: 0.8rem;
+  }
+
+  .eval-metric-value {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .eval-metric-card {
+    flex: 1 1 100%;
+  }
+}
