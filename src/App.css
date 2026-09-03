@@ -86,8 +86,9 @@
   padding: 0.3rem 0.1rem;
   border-radius: 0;
   font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.025em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--text-muted);
   text-decoration: none;
   transition: color 0.2s, text-shadow 0.2s;
@@ -98,10 +99,10 @@
 
 .nav-link.active {
   color: #FFFFFF;
-  font-weight: 600;
 }
 
-.nav-pill {
+.nav-link::after {
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -109,8 +110,16 @@
   height: 2px;
   background: var(--accent-red);
   border-radius: 1px;
-  box-shadow: 0 0 10px rgba(255, 0, 51, 0.8);
-  z-index: 0;
+  box-shadow: 0 0 8px rgba(255, 0, 51, 0.8);
+  opacity: 0;
+  transform: scaleX(0);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.nav-link.active::after,
+.nav-link:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
 .nav-link-text {
@@ -120,7 +129,6 @@
 
 .nav-link:not(.active):hover {
   color: #FFFFFF;
-  text-shadow: 0 0 6px rgba(0, 240, 255, 0.4);
 }
 
 .dark-toggle {

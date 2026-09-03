@@ -1,11 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 const links = [
-  { path: '/', label: 'Dashboard' },
-  { path: '/rankings', label: 'Rankings' },
-  { path: '/buscar', label: 'Buscar' },
-  { path: '/posiciones', label: 'Tabla de Posiciones' },
+  { path: '/', label: 'DASHBOARD' },
+  { path: '/rankings', label: 'RANKINGS' },
+  { path: '/buscar', label: 'BUSCAR' },
+  { path: '/posiciones', label: 'TABLA DE POSICIONES' },
 ];
 
 export default function Navbar() {
@@ -23,13 +22,6 @@ export default function Navbar() {
         <div className="navbar-links">
           {links.map(({ path, label }) => (
             <Link key={path} to={path} className={`nav-link ${location.pathname === path ? 'active' : ''}`}>
-              {location.pathname === path && (
-                <motion.div
-                  className="nav-pill"
-                  layoutId="active-indicator"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
               <span className="nav-link-text">{label}</span>
             </Link>
           ))}
