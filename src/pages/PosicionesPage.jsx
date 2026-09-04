@@ -41,18 +41,15 @@ export default function PosicionesPage() {
 
   const careerStats = useMemo(() => {
     return careerResults.map(cr => {
-      const careerInfo = careers.find(c => c.name === cr.name);
       const ingresados = students.filter(s => s.ingresado === true && String(s.carrera || '').trim() === cr.name);
-      const vacantes = careerInfo?.target || null;
-      const ratio = vacantes && ingresados.length > 0 ? ingresados.length / vacantes : null;
+      const vacantes = ingresados.length;
       return {
         ...cr,
         vacantes,
         count: ingresados.length,
-        ratio,
       };
     });
-  }, [careerResults, careers, students]);
+  }, [careerResults, students]);
 
   const filtered = useMemo(() => {
     let result = careerStats;
@@ -101,12 +98,12 @@ export default function PosicionesPage() {
     return buckets;
   }, [selectedCareerData, students]);
 
-  const getDifficultyLevel = (ratio) => {
-    if (ratio == null) return 0;
-    if (ratio >= 10) return 5;
-    if (ratio >= 7) return 4;
-    if (ratio >= 4) return 3;
-    if (ratio >= 2) return 2;
+  const getDifficultyLevel = (min) => {
+    if (min == null) return 0;
+    if (min >= 18) return 5;
+    if (min >= 15) return 4;
+    if (min >= 12) return 3;
+    if (min >= 9) return 2;
     return 1;
   };
 
@@ -158,7 +155,7 @@ export default function PosicionesPage() {
           <div className="careers-empty">No se encontraron carreras.</div>
         )}
         {filtered.map(c => {
-          const level = getDifficultyLevel(c.ratio);
+          const level = getDifficultyLevel(c.min);
           return (
             <div
               key={c.name}
@@ -172,17 +169,17 @@ export default function PosicionesPage() {
               <div className="career-card-stats">
                 <div className="career-stat">
                   <span className="career-stat-label">VACANTES</span>
-                  <span className="career-stat-value">{c.vacantes ?? '—'}</span>
+                  <span className="career-stat-value">{c.vacantes}</span>
+                </div>
+                <div className="career-stat">
+                  <span className="career-stat-label">INGRESANTES</span>
+                  <span className="career-stat-value">{c.count}</span>
                 </div>
                 <div className="career-stat">
                   <span className="career-stat-label">CORTE</span>
                   <span className="career-stat-value career-stat-accent">
                     {c.min != null ? c.min.toFixed(1) : '—'}
                   </span>
-                </div>
-                <div className="career-stat">
-                  <span className="career-stat-label">POSTULANTES</span>
-                  <span className="career-stat-value">{c.count}</span>
                 </div>
               </div>
               <div className="career-card-bar-wrap">
@@ -221,10 +218,14 @@ export default function PosicionesPage() {
               </button>
             </div>
 
-            <div className="career-detail-stats">
+              <div className="career-detail-stats">
               <div className="eval-metric-card">
                 <span className="eval-metric-label">VACANTES</span>
-                <span className="eval-metric-value">{selectedCareerData.vacantes ?? '—'}</span>
+                <span className="eval-metric-value">{selectedCareerData.vacantes}</span>
+              </div>
+              <div className="eval-metric-card">
+                <span className="eval-metric-label">INGRESANTES</span>
+                <span className="eval-metric-value">{selectedCareerData.count}</span>
               </div>
               <div className="eval-metric-card">
                 <span className="eval-metric-label">CORTE MÍNIMO</span>
@@ -237,10 +238,6 @@ export default function PosicionesPage() {
                 <span className="eval-metric-value eval-metric-success">
                   {selectedCareerData.max != null ? selectedCareerData.max.toFixed(1) : '—'}
                 </span>
-              </div>
-              <div className="eval-metric-card">
-                <span className="eval-metric-label">POSTULANTES</span>
-                <span className="eval-metric-value">{selectedCareerData.count}</span>
               </div>
             </div>
 
