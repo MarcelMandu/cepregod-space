@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY_PARTICIPANTS = 'cepregod_sorteo_participants';
-const STORAGE_KEY_DRAWING = 'cepregod_sorteo_drawing';
-const STORAGE_KEY_WINNER = 'cepregod_sorteo_winner';
 const ADMIN_KEY = 'CEPRE2026';
 
 function loadParticipants() {
@@ -48,16 +46,23 @@ export default function AdminSorteo() {
     }
   }, [passwordInput]);
 
-  const startDraw = useCallback(() => {
+  const startDraw = useCallback(async () => {
     if (participants.length < 2) return;
     setIsDrawing(true);
     setShowWinner(false);
     setWinner(null);
-    localStorage.setItem(STORAGE_KEY_DRAWING, 'true');
+
+    try {
+      await fetch('/api/sorteo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ drawing: true, winner: null })
+      });
+    } catch {}
 
     let count = 0;
     const maxIterations = 30 + Math.floor(Math.random() * 10);
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       setCurrentNumber(participants[count % participants.length].id);
       count++;
       if (count >= maxIterations) {
@@ -67,8 +72,14 @@ export default function AdminSorteo() {
         setWinner(w);
         setIsDrawing(false);
         setShowWinner(true);
-        localStorage.setItem(STORAGE_KEY_WINNER, JSON.stringify(w));
-        localStorage.removeItem(STORAGE_KEY_DRAWING);
+
+        try {
+          await fetch('/api/sorteo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ drawing: false, winner: w })
+          });
+        } catch {}
       }
     }, 80);
   }, [participants]);

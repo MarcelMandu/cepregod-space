@@ -3,8 +3,6 @@ import { useState, useEffect, useCallback } from 'react';
 const STORAGE_KEY_PARTICIPANTS = 'cepregod_sorteo_participants';
 const STORAGE_KEY_LAST_ID = 'cepregod_sorteo_lastId';
 const STORAGE_KEY_USER_HASH = 'cepregod_sorteo_userHash';
-const STORAGE_KEY_DRAWING = 'cepregod_sorteo_drawing';
-const STORAGE_KEY_WINNER = 'cepregod_sorteo_winner';
 const FOLLOWER_GOAL = 100;
 const WHATSAPP_URL = 'https://whatsapp.com/channel/0029Vb98c4E60eBiHsfPq73O';
 
@@ -69,10 +67,10 @@ export default function SorteosPage() {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const poll = async () => {
       try {
-        const drawing = localStorage.getItem(STORAGE_KEY_DRAWING) === 'true';
-        const winnerData = localStorage.getItem(STORAGE_KEY_WINNER);
+        const res = await fetch('/api/sorteo');
+        const { drawing, winner: apiWinner } = await res.json();
 
         if (drawing && !isDrawing && !showWinner) {
           const parts = loadParticipants();
@@ -87,22 +85,21 @@ export default function SorteosPage() {
             count++;
             if (count >= maxIterations) {
               clearInterval(rollInterval);
-              if (winnerData) {
-                const w = JSON.parse(winnerData);
-                setWinner(w);
+              if (apiWinner) {
+                setWinner(apiWinner);
               } else {
                 const idx = Math.floor(Math.random() * parts.length);
                 setWinner(parts[idx]);
               }
               setIsDrawing(false);
               setShowWinner(true);
-              localStorage.removeItem(STORAGE_KEY_DRAWING);
-              localStorage.removeItem(STORAGE_KEY_WINNER);
             }
           }, 80);
         }
       } catch {}
-    }, 1000);
+    };
+
+    const interval = setInterval(poll, 2000);
     return () => clearInterval(interval);
   }, [isDrawing, showWinner]);
 

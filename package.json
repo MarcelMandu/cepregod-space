@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.4",
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.4.7",
     "chartjs-plugin-datalabels": "^2.2.0",
