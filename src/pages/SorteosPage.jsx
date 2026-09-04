@@ -2,35 +2,55 @@ import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY_PARTICIPANTS = 'cepregod_sorteo_participants';
 const STORAGE_KEY_LAST_ID = 'cepregod_sorteo_lastId';
-const FOLLOWER_GOAL = 500;
-const CURRENT_FOLLOWERS = 320;
+const STORAGE_KEY_USER_HASH = 'cepregod_sorteo_userHash';
+const STORAGE_KEY_DRAWING = 'cepregod_sorteo_drawing';
+const STORAGE_KEY_WINNER = 'cepregod_sorteo_winner';
+const FOLLOWER_GOAL = 100;
 const WHATSAPP_URL = 'https://whatsapp.com/channel/0029Vb98c4E60eBiHsfPq73O';
 
 function loadParticipants() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY_PARTICIPANTS)) || [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 function loadLastId() {
   try {
     return Number(localStorage.getItem(STORAGE_KEY_LAST_ID)) || 0;
-  } catch {
-    return 0;
+  } catch { return 0; }
+}
+
+function loadUserHash() {
+  try {
+    return localStorage.getItem(STORAGE_KEY_USER_HASH) || null;
+  } catch { return null; }
+}
+
+function hashName(name, phone) {
+  let hash = 0;
+  const str = name.trim().toLowerCase() + phone.trim();
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
   }
+  return 'h_' + Math.abs(hash).toString(36);
+}
+
+function maskPhone(phone) {
+  if (!phone || phone.length <= 4) return phone || '';
+  return phone.slice(0, 3) + '***' + phone.slice(-3);
 }
 
 export default function SorteosPage() {
   const [participants, setParticipants] = useState(loadParticipants);
   const [lastId, setLastId] = useState(loadLastId);
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [ticketGenerated, setTicketGenerated] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentNumber, setCurrentNumber] = useState(0);
   const [winner, setWinner] = useState(null);
   const [showWinner, setShowWinner] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_PARTICIPANTS, JSON.stringify(participants));
@@ -40,43 +60,89 @@ export default function SorteosPage() {
     localStorage.setItem(STORAGE_KEY_LAST_ID, String(lastId));
   }, [lastId]);
 
-  const progressPercent = Math.min((CURRENT_FOLLOWERS / FOLLOWER_GOAL) * 100, 100);
+  useEffect(() => {
+    const userHash = loadUserHash();
+    if (userHash) {
+      const saved = participants.find(p => p.hash === userHash);
+      if (saved) setTicketGenerated(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        const drawing = localStorage.getItem(STORAGE_KEY_DRAWING) === 'true';
+        const winnerData = localStorage.getItem(STORAGE_KEY_WINNER);
+
+        if (drawing && !isDrawing && !showWinner) {
+          const parts = loadParticipants();
+          if (parts.length < 2) return;
+          setIsDrawing(true);
+          setShowWinner(false);
+          setWinner(null);
+          let count = 0;
+          const maxIterations = 30 + Math.floor(Math.random() * 10);
+          const rollInterval = setInterval(() => {
+            setCurrentNumber(parts[count % parts.length].id);
+            count++;
+            if (count >= maxIterations) {
+              clearInterval(rollInterval);
+              if (winnerData) {
+                const w = JSON.parse(winnerData);
+                setWinner(w);
+              } else {
+                const idx = Math.floor(Math.random() * parts.length);
+                setWinner(parts[idx]);
+              }
+              setIsDrawing(false);
+              setShowWinner(true);
+              localStorage.removeItem(STORAGE_KEY_DRAWING);
+              localStorage.removeItem(STORAGE_KEY_WINNER);
+            }
+          }, 80);
+        }
+      } catch {}
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isDrawing, showWinner]);
 
   const generateTicket = useCallback(() => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+    const trimmedName = name.trim();
+    const trimmedPhone = phone.trim();
+    if (!trimmedName || !trimmedPhone) {
+      setFormError('Completa ambos campos.');
+      return;
+    }
+    if (trimmedPhone.length < 8) {
+      setFormError('Ingresa un número de teléfono válido.');
+      return;
+    }
+
+    const userHash = hashName(trimmedName, trimmedPhone);
+    const existing = participants.find(p => p.hash === userHash);
+    if (existing) {
+      setTicketGenerated(existing);
+      localStorage.setItem(STORAGE_KEY_USER_HASH, userHash);
+      setFormError('');
+      return;
+    }
+
     const newId = lastId + 1;
-    const ticket = { id: newId, name: trimmed, date: new Date().toISOString() };
+    const ticket = {
+      id: newId,
+      name: trimmedName,
+      phone: trimmedPhone,
+      hash: userHash,
+      date: new Date().toISOString()
+    };
     setParticipants(prev => [...prev, ticket]);
     setLastId(newId);
     setTicketGenerated(ticket);
+    localStorage.setItem(STORAGE_KEY_USER_HASH, userHash);
+    setFormError('');
     setName('');
-  }, [name, lastId]);
-
-  const startDraw = useCallback(() => {
-    if (participants.length < 2) return;
-    setIsDrawing(true);
-    setShowWinner(false);
-    setWinner(null);
-    let count = 0;
-    const maxIterations = 30 + Math.floor(Math.random() * 10);
-    const interval = setInterval(() => {
-      setCurrentNumber(participants[count % participants.length].id);
-      count++;
-      if (count >= maxIterations) {
-        clearInterval(interval);
-        const winnerIdx = Math.floor(Math.random() * participants.length);
-        setWinner(participants[winnerIdx]);
-        setIsDrawing(false);
-        setShowWinner(true);
-      }
-    }, 80);
-  }, [participants]);
-
-  const resetDraw = useCallback(() => {
-    setShowWinner(false);
-    setWinner(null);
-  }, []);
+    setPhone('');
+  }, [name, phone, lastId, participants]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') generateTicket();
@@ -97,105 +163,86 @@ export default function SorteosPage() {
         </p>
       </section>
 
+      <div className="sorteo-prize-card">
+        <div className="sorteo-prize-icon">📚</div>
+        <h3 className="sorteo-prize-title">LIBRO OFICIAL CEPREGOD</h3>
+        <p className="sorteo-prize-desc">Preparación Universitaria UNI — Edición 2026</p>
+      </div>
+
       <div className="sorteo-goal-card">
-        <div className="sorteo-goal-header">
-          <span className="sorteo-goal-count">{CURRENT_FOLLOWERS}</span>
-          <span className="sorteo-goal-separator">/</span>
-          <span className="sorteo-goal-total">{FOLLOWER_GOAL} SEGUIDORES</span>
-        </div>
-        <div className="sorteo-progress-bar">
-          <div
-            className="sorteo-progress-fill"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-        <p className="sorteo-goal-legend">
-          El sorteo se ejecutará en vivo en esta página al llegar a los {FOLLOWER_GOAL} seguidores.
+        <p className="sorteo-goal-text">
+          ¡Al llegar a la meta de <strong>{FOLLOWER_GOAL} SEGUIDORES</strong> en nuestro
+          canal de WhatsApp, se activará el sorteo en vivo en esta misma página! 🚀
         </p>
       </div>
 
       <div className="sorteo-step">
         <div className="sorteo-step-number">1</div>
         <div className="sorteo-step-content">
-          <h3 className="sorteo-step-title">Suscríbete al Canal de WhatsApp</h3>
-          <p className="sorteo-step-desc">Únete para recibir notificaciones del sorteo.</p>
+          <h3 className="sorteo-step-title">Únete al Canal de WhatsApp</h3>
+          <p className="sorteo-step-desc">Suscríbete para recibir notificaciones del sorteo.</p>
           <a
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="sorteo-whatsapp-btn"
           >
-            📲 Ir al Canal de WhatsApp
+            📲 Unirme al Canal de WhatsApp
           </a>
         </div>
       </div>
 
-      <div className="sorteo-step">
-        <div className="sorteo-step-number">2</div>
-        <div className="sorteo-step-content">
-          <h3 className="sorteo-step-title">Registra tu Ticket</h3>
-          <p className="sorteo-step-desc">Ingresa tu nombre o código para generar tu participante.</p>
-          <div className="sorteo-register">
-            <div className="search-input-wrap">
-              <span className="search-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Ingresa tu Nombre o Código"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
+      {!ticketGenerated && (
+        <div className="sorteo-step">
+          <div className="sorteo-step-number">2</div>
+          <div className="sorteo-step-content">
+            <h3 className="sorteo-step-title">Registra tu Ticket</h3>
+            <p className="sorteo-step-desc">Completa tus datos para obtener tu ticket participante.</p>
+            <div className="sorteo-form">
+              <div className="sorteo-form-group">
+                <span className="sorteo-form-icon">👤</span>
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Ingresa tu Nombre Completo"
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); setFormError(''); }}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+              <div className="sorteo-form-group">
+                <span className="sorteo-form-icon">📱</span>
+                <input
+                  type="tel"
+                  className="search-input"
+                  placeholder="Ingresa tu Número de Teléfono"
+                  value={phone}
+                  onChange={(e) => { setPhone(e.target.value); setFormError(''); }}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+              {formError && <p className="sorteo-form-error">{formError}</p>}
+              <button
+                className="sorteo-generate-btn"
+                onClick={generateTicket}
+                disabled={!name.trim() || !phone.trim()}
+              >
+                🎟️ Obtener Mi Ticket
+              </button>
             </div>
-            <button
-              className="sorteo-generate-btn"
-              onClick={generateTicket}
-              disabled={!name.trim()}
-            >
-              🎟️ Generar Ticket
-            </button>
           </div>
         </div>
-      </div>
+      )}
 
       {ticketGenerated && (
         <div className="sorteo-ticket">
-          <div className="sorteo-ticket-badge">TICKET GENERADO</div>
-          <div className="sorteo-ticket-id">#{String(ticketGenerated.id).padStart(3, '0')}</div>
+          <div className="sorteo-ticket-badge">TICKET #{String(ticketGenerated.id).padStart(3, '0')}</div>
           <div className="sorteo-ticket-name">{ticketGenerated.name}</div>
-          <div className="sorteo-ticket-note">Guarda tu número — lo necesitarás para el sorteo.</div>
-        </div>
-      )}
-
-      {participants.length > 0 && (
-        <div className="sorteo-participants">
-          <h3 className="sorteo-participants-title">
-            👥 Participantes ({participants.length})
-          </h3>
-          <div className="sorteo-participants-grid">
-            {participants.map(p => (
-              <div key={p.id} className="sorteo-participant-card">
-                <span className="sorteo-participant-id">#{String(p.id).padStart(3, '0')}</span>
-                <span className="sorteo-participant-name">{p.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {participants.length >= 2 && !isDrawing && !showWinner && (
-        <div className="sorteo-draw-section">
-          <button className="sorteo-draw-btn" onClick={startDraw}>
-            🎲 Iniciar Sorteo Aleatorio
-          </button>
-          <p className="sorteo-draw-note">
-            Se seleccionará un ganador al azar de entre los {participants.length} participantes.
+          <div className="sorteo-ticket-phone">{maskPhone(ticketGenerated.phone)}</div>
+          <p className="sorteo-ticket-note">
+            Ya estás participando con el TICKET #{String(ticketGenerated.id).padStart(3, '0')}.
           </p>
+          <p className="sorteo-ticket-note">Guarda tu número — lo necesitarás para el sorteo.</p>
         </div>
       )}
 
@@ -212,16 +259,13 @@ export default function SorteosPage() {
       )}
 
       {showWinner && winner && (
-        <div className="sorteo-winner-overlay" onClick={resetDraw}>
-          <div className="sorteo-winner-card" onClick={e => e.stopPropagation()}>
+        <div className="sorteo-winner-overlay">
+          <div className="sorteo-winner-card">
             <div className="sorteo-winner-confetti">🎉🏆🎉</div>
             <div className="sorteo-winner-badge">🏆 GANADOR</div>
             <div className="sorteo-winner-ticket">TICKET #{String(winner.id).padStart(3, '0')}</div>
             <div className="sorteo-winner-name">{winner.name}</div>
             <div className="sorteo-winner-congrats">¡Felicitaciones!</div>
-            <button className="sorteo-winner-close" onClick={resetDraw}>
-              Cerrar
-            </button>
           </div>
         </div>
       )}
