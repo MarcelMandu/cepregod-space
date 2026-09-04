@@ -2359,3 +2359,283 @@
     flex: 1 1 100%;
   }
 }
+
+/* ========================================
+   CAREERS PAGE
+   ======================================== */
+
+/* Faculty Filters */
+.faculty-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.faculty-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.faculty-pill:hover {
+  border-color: rgba(255, 0, 51, 0.4);
+  color: var(--text-main);
+}
+
+.faculty-pill.active {
+  background: rgba(255, 0, 51, 0.2);
+  border-color: var(--accent-red);
+  color: var(--text-main);
+  box-shadow: 0 0 12px rgba(255, 0, 51, 0.3);
+}
+
+/* Careers Grid */
+.careers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.careers-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Career Card */
+.career-card {
+  background: #121212;
+  border: 1px solid #1A1A1E;
+  border-radius: 12px;
+  padding: 1.2rem;
+  cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+
+.career-card:hover {
+  border-color: rgba(255, 0, 51, 0.5);
+  box-shadow: 0 0 16px rgba(255, 0, 51, 0.15);
+  transform: translateY(-2px);
+}
+
+.career-card.selected {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 20px rgba(255, 0, 51, 0.25);
+}
+
+.career-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.career-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.career-card-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.career-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.career-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.career-stat-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.career-stat-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.career-stat-accent {
+  color: var(--accent-red);
+  text-shadow: 0 0 8px rgba(255, 0, 51, 0.4);
+}
+
+/* Career Difficulty Bar */
+.career-card-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.career-card-bar {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+}
+
+.career-bar-segment {
+  height: 6px;
+  flex: 1;
+  border-radius: 3px;
+  background: #1A1A1E;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.career-bar-segment.filled {
+  background: var(--accent-red);
+  box-shadow: 0 0 6px rgba(255, 0, 51, 0.6);
+}
+
+.career-bar-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Career Detail Overlay */
+.career-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.career-detail-panel {
+  background: #0a0a0a;
+  border: 1px solid #1A1A1E;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.career-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.2rem;
+}
+
+.career-detail-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.career-detail-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  margin-top: 0.3rem;
+}
+
+.career-detail-close {
+  background: transparent;
+  border: 1px solid #2A2A2A;
+  border-radius: 8px;
+  padding: 0.4rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.career-detail-close:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+  box-shadow: 0 0 8px rgba(255, 0, 51, 0.3);
+}
+
+.career-detail-stats {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.career-detail-stats .eval-metric-card {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .careers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .faculty-filters {
+    gap: 0.4rem;
+  }
+
+  .faculty-pill {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.72rem;
+  }
+
+  .career-detail-overlay {
+    padding: 1rem;
+  }
+
+  .career-detail-panel {
+    padding: 1rem;
+  }
+
+  .career-detail-stats {
+    gap: 0.4rem;
+  }
+
+  .career-detail-stats .eval-metric-card {
+    min-width: 80px;
+  }
+}

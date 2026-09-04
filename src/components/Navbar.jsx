@@ -5,7 +5,7 @@ const links = [
   { path: '/', label: 'DASHBOARD' },
   { path: '/rankings', label: 'RANKINGS' },
   { path: '/buscar', label: 'BUSCAR' },
-  { path: '/posiciones', label: 'TABLA DE POSICIONES' },
+  { path: '/posiciones', label: 'CARRERAS' },
 ];
 
 export default function Navbar() {

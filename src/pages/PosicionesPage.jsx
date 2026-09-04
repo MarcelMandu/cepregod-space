@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext.jsx';
+import { DistributionChart } from '../components/Charts.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ErrorScreen from '../components/ErrorScreen.jsx';
 
@@ -21,189 +22,278 @@ function maskCode(codigo) {
   return codigo ? `••••${String(codigo).slice(-4)}` : '—';
 }
 
-function notaToVig(p, s) {
-  if (p == null || isNaN(p)) return null;
-  const max = s && s.isArquitectura ? 3701 : 2700;
-  return (Number(p) / max) * 20;
-}
-
 export default function PosicionesPage() {
   const { data, loading, error, retry } = useData();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState(null);
+  const [selectedFaculty, setSelectedFaculty] = useState('TODAS');
+  const [selectedCareer, setSelectedCareer] = useState(null);
 
   const students = data?.students || [];
   const careerResults = data?.careerResults || [];
   const careers = data?.careers || [];
+  const distributions = data?.distributions || {};
+
+  const faculties = useMemo(() => {
+    const set = new Set(careerResults.map(c => c.facultad).filter(Boolean));
+    return ['TODAS', ...Array.from(set).sort()];
+  }, [careerResults]);
 
   const careerStats = useMemo(() => {
     return careerResults.map(cr => {
-      const list = students.filter(s => s.ingresado === true && String(s.carrera || '').trim() === cr.name);
+      const careerInfo = careers.find(c => c.name === cr.name);
+      const ingresados = students.filter(s => s.ingresado === true && String(s.carrera || '').trim() === cr.name);
+      const vacantes = careerInfo?.target || null;
+      const ratio = vacantes && ingresados.length > 0 ? ingresados.length / vacantes : null;
       return {
         ...cr,
-        vacantes: (careers.find(c => c.name === cr.name) || {}).target,
-        maxPuntaje: cr.max,
-        minPuntaje: cr.min,
-        count: list.length,
+        vacantes,
+        count: ingresados.length,
+        ratio,
       };
     });
   }, [careerResults, careers, students]);
 
   const filtered = useMemo(() => {
-    if (!query) return careerStats;
-    const q = query.toLowerCase();
-    return careerStats.filter(c => c.name.toLowerCase().includes(q));
-  }, [careerStats, query]);
+    let result = careerStats;
+    if (selectedFaculty !== 'TODAS') {
+      result = result.filter(c => c.facultad === selectedFaculty);
+    }
+    if (query) {
+      const q = query.toLowerCase();
+      result = result.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        (c.facultad && c.facultad.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [careerStats, selectedFaculty, query]);
 
-  const selectedCareer = useMemo(() => {
-    if (!selected) return null;
-    return careerStats.find(c => c.name === selected.name) || null;
-  }, [selected, careerStats]);
+  const selectedCareerData = useMemo(() => {
+    if (!selectedCareer) return null;
+    return careerStats.find(c => c.name === selectedCareer.name) || null;
+  }, [selectedCareer, careerStats]);
 
   const ingresantes = useMemo(() => {
-    if (!selectedCareer) return [];
+    if (!selectedCareerData) return [];
     return students
-      .filter(s => s.ingresado === true && String(s.carrera || '').trim() === selectedCareer.name)
+      .filter(s => s.ingresado === true && String(s.carrera || '').trim() === selectedCareerData.name)
       .map(s => ({ student: s, total: acumulado(s) }))
       .sort((a, b) => b.total - a.total);
-  }, [selectedCareer, students]);
+  }, [selectedCareerData, students]);
+
+  const careerDistribution = useMemo(() => {
+    if (!selectedCareerData) return null;
+    const careerStudents = students.filter(s =>
+      s.ingresado === true && String(s.carrera || '').trim() === selectedCareerData.name
+    );
+    if (careerStudents.length === 0) return null;
+
+    const buckets = {};
+    careerStudents.forEach(s => {
+      const nota = s.promedio;
+      if (nota == null || isNaN(nota)) return;
+      const bucket = Math.floor(nota / 2) * 2;
+      const key = `${bucket}-${bucket + 2}`;
+      buckets[key] = (buckets[key] || 0) + 1;
+    });
+
+    return buckets;
+  }, [selectedCareerData, students]);
+
+  const getDifficultyLevel = (ratio) => {
+    if (ratio == null) return 0;
+    if (ratio >= 10) return 5;
+    if (ratio >= 7) return 4;
+    if (ratio >= 4) return 3;
+    if (ratio >= 2) return 2;
+    return 1;
+  };
 
   if (loading) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} onRetry={retry} />;
 
   return (
     <div className="dashboard">
-      <div className="hero-section">
-        <div className="hero-left">
-          <h1 className="hero-title">
-            <span className="hero-ciclo">Resultados Finales</span>
-            <span className="hero-cepre">CEPRE UNI 2026-2</span>
-          </h1>
-          <p className="hero-subtitle">
-            Puntaje máximo y mínimo de corte por carrera, y cuadro de posiciones de ingresantes.
-          </p>
-          <p className="hero-note">
-            Los datos se completarán automáticamente cuando se publiquen los resultados finales.
-          </p>
-        </div>
-        <div className="hero-right" />
-      </div>
-      <div className="hero-divider" />
+      <section className="hero-center">
+        <h1 className="hero-center-title">
+          <span className="hero-center-ciclo">Carreras</span>
+          <span className="hero-center-cepre">CEPRE UNI 2026</span>
+        </h1>
+        <p className="hero-center-subtitle">
+          Explora todas las carreras disponibles, puntajes de corte y postulantes CEPRE.
+        </p>
+      </section>
 
-      <div className="ranking-card">
-        <h3>Resumen por Carrera — Puntajes Máximos y Mínimos</h3>
-        <div className="search-input-wrap" style={{ marginBottom: '1rem' }}>
-          <span className="search-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </span>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Buscar carrera..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-        <div className="table-wrapper">
-          <table className="ranking-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Carrera</th>
-                <th>Vacantes</th>
-                <th>Puntaje Máximo</th>
-                <th>Puntaje Mínimo / Corte</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 && (
-                <tr><td colSpan="5" className="td-empty">No hay carreras disponibles aún.</td></tr>
-              )}
-              {filtered.map((c, i) => (
-                <tr
-                  key={c.name}
-                  className={`ranking-row pos-reasign-row ${selected?.name === c.name ? 'pos-selected' : ''}`}
-                  onClick={() => setSelected(c)}
-                >
-                  <td className="td-rank">{i + 1}</td>
-                  <td className="td-nombre">{c.name}</td>
-                  <td className="td-nota">{c.count != null ? c.count : '-'}</td>
-                  <td className="td-nota">
-                    {c.maxPuntaje != null
-                      ? <span className="pos-max">{c.maxPuntaje.toFixed(2)}</span>
-                      : <span className="td-pendiente">—</span>}
-                  </td>
-                  <td className="td-nota">
-                    {c.minPuntaje != null
-                      ? <span className="pos-min">{c.minPuntaje.toFixed(2)}</span>
-                      : <span className="td-pendiente">—</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="search-input-wrap" style={{ marginBottom: '1rem' }}>
+        <span className="search-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Buscar carrera por nombre o facultad..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
 
-      {selectedCareer && (
-        <div className="ranking-card">
-          <h3>
-            {selectedCareer.maxPuntaje != null && <span className="pos-crown-icon">👑</span>}
-            Cuadro de Posiciones — {selectedCareer.name}
-            <span className="section-count">{ingresantes.length} postulantes / {ingresantes.length} ingresantes</span>
-          </h3>
-          <div className="table-wrapper">
-            <table className="ranking-table">
-              <thead>
-                <tr>
-                  <th>Puesto</th>
-                  <th>Nombre</th>
-                  <th>Código/DNI</th>
-                  <th>Puntaje Acumulado</th>
-                  <th>Nota Vigesimal</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ingresantes.length === 0 && (
-                  <tr><td colSpan="6" className="td-empty">Aún no hay ingresantes publicados para esta carrera.</td></tr>
-                )}
-                {ingresantes.map((item, idx) => {
-                  const isFirst = idx === 0;
-                  return (
-                    <tr
-                      key={item.student.codigo}
-                      className={`ranking-row pos-entry ${isFirst ? 'pos-first' : ''}`}
-                      onClick={() => navigate(`/student/${item.student.codigo}`)}
-                    >
-                      <td className="td-rank">{isFirst ? <span className="pos-crown">👑</span> : idx + 1}</td>
-                      <td className="td-nombre">{item.student.nombre || '—'}</td>
-                      <td className="td-codigo">{maskCode(item.student.codigo)}</td>
-                      <td className="td-nota"><span className={isFirst ? 'pos-first-score' : ''}>{item.total.toFixed(2)}</span></td>
-                      <td className="td-nota">{notaToVig(item.total, item.student) != null ? notaToVig(item.total, item.student).toFixed(2) : '—'}</td>
-                      <td className="td-nota"><span className="pos-ingreso">✓ INGRESÓ</span></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          {ingresantes.length > 0 && (
-            <div className="pos-cut-line-wrap">
-              <div className="pos-cut-line" />
-              <span className="pos-cut-label">Límite de vacantes ({selectedCareer.count != null ? selectedCareer.count : '-'})</span>
+      <div className="faculty-filters">
+        {faculties.map(f => (
+          <button
+            key={f}
+            className={`faculty-pill ${selectedFaculty === f ? 'active' : ''}`}
+            onClick={() => setSelectedFaculty(f)}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      <div className="careers-grid">
+        {filtered.length === 0 && (
+          <div className="careers-empty">No se encontraron carreras.</div>
+        )}
+        {filtered.map(c => {
+          const level = getDifficultyLevel(c.ratio);
+          return (
+            <div
+              key={c.name}
+              className={`career-card ${selectedCareerData?.name === c.name ? 'selected' : ''}`}
+              onClick={() => setSelectedCareer(c)}
+            >
+              <div className="career-card-header">
+                <span className="career-card-name">{c.name}</span>
+                {c.facultad && <span className="career-card-badge">{c.facultad}</span>}
+              </div>
+              <div className="career-card-stats">
+                <div className="career-stat">
+                  <span className="career-stat-label">VACANTES</span>
+                  <span className="career-stat-value">{c.vacantes ?? '—'}</span>
+                </div>
+                <div className="career-stat">
+                  <span className="career-stat-label">CORTE</span>
+                  <span className="career-stat-value career-stat-accent">
+                    {c.min != null ? c.min.toFixed(1) : '—'}
+                  </span>
+                </div>
+                <div className="career-stat">
+                  <span className="career-stat-label">POSTULANTES</span>
+                  <span className="career-stat-value">{c.count}</span>
+                </div>
+              </div>
+              <div className="career-card-bar-wrap">
+                <div className="career-card-bar">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <div
+                      key={i}
+                      className={`career-bar-segment ${i < level ? 'filled' : ''}`}
+                    />
+                  ))}
+                </div>
+                <span className="career-bar-label">
+                  {level >= 4 ? 'MUY COMPETITIVA' : level >= 3 ? 'COMPETITIVA' : level >= 2 ? 'MODERADA' : 'ACCESIBLE'}
+                </span>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
-      {!selectedCareer && (
-        <div className="chart-card" style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-          Selecciona una carrera para ver su cuadro de posiciones.
+      {selectedCareerData && (
+        <div className="career-detail-overlay" onClick={() => setSelectedCareer(null)}>
+          <div className="career-detail-panel" onClick={e => e.stopPropagation()}>
+            <div className="career-detail-header">
+              <div>
+                <h2 className="career-detail-title">{selectedCareerData.name}</h2>
+                {selectedCareerData.facultad && (
+                  <span className="career-detail-badge">{selectedCareerData.facultad}</span>
+                )}
+              </div>
+              <button className="career-detail-close" onClick={() => setSelectedCareer(null)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="career-detail-stats">
+              <div className="eval-metric-card">
+                <span className="eval-metric-label">VACANTES</span>
+                <span className="eval-metric-value">{selectedCareerData.vacantes ?? '—'}</span>
+              </div>
+              <div className="eval-metric-card">
+                <span className="eval-metric-label">CORTE MÍNIMO</span>
+                <span className="eval-metric-value eval-metric-danger">
+                  {selectedCareerData.min != null ? selectedCareerData.min.toFixed(1) : '—'}
+                </span>
+              </div>
+              <div className="eval-metric-card">
+                <span className="eval-metric-label">MÁXIMO</span>
+                <span className="eval-metric-value eval-metric-success">
+                  {selectedCareerData.max != null ? selectedCareerData.max.toFixed(1) : '—'}
+                </span>
+              </div>
+              <div className="eval-metric-card">
+                <span className="eval-metric-label">POSTULANTES</span>
+                <span className="eval-metric-value">{selectedCareerData.count}</span>
+              </div>
+            </div>
+
+            {careerDistribution && (
+              <div className="eval-chart">
+                <DistributionChart
+                  data={careerDistribution}
+                  title={`DISTRIBUCIÓN — ${selectedCareerData.name}`}
+                  height={250}
+                  color="#FF0033"
+                />
+              </div>
+            )}
+
+            <div className="eval-top10">
+              <h3 className="eval-top10-title">POSTULANTES CEPRE — {selectedCareerData.name}</h3>
+              <div className="table-wrapper">
+                <table className="eval-top10-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>CÓDIGO</th>
+                      <th>NOMBRE</th>
+                      <th>PUNTAJE</th>
+                      <th>ESTADO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ingresantes.map((item, idx) => (
+                      <tr
+                        key={item.student.codigo}
+                        className="eval-top10-row"
+                        onClick={() => navigate(`/student/${item.student.codigo}`)}
+                      >
+                        <td className="eval-td-puesto">{idx + 1}</td>
+                        <td className="eval-td-codigo">{maskCode(item.student.codigo)}</td>
+                        <td className="eval-td-nombre">{item.student.nombre || '—'}</td>
+                        <td className="eval-td-nota">{item.total.toFixed(1)}</td>
+                        <td className="eval-td-nota">
+                          <span className="pos-ingreso">✓ INGRESÓ</span>
+                        </td>
+                      </tr>
+                    ))}
+                    {ingresantes.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="eval-td-empty">Aún no hay ingresantes publicados para esta carrera.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
