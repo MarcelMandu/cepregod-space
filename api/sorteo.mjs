@@ -18,24 +18,39 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const drawing = await redis.get('sorteo:drawing');
       const winner = await redis.get('sorteo:winner');
-      return res.status(200).json({ drawing: !!drawing, winner: winner || null });
+      const participants = (await redis.get('sorteo:participants')) || [];
+      return res.status(200).json({
+        drawing: !!drawing,
+        winner: winner || null,
+        participants
+      });
     }
 
     if (req.method === 'POST') {
-      const { drawing, winner } = req.body;
+      const { action, participant, drawing, winner } = req.body;
 
-      if (drawing !== undefined) {
-        await redis.set('sorteo:drawing', drawing);
+      if (action === 'register' && participant) {
+        const participants = (await redis.get('sorteo:participants')) || [];
+        const newId = participants.length > 0 ? participants[participants.length - 1].id + 1 : 1;
+        const newParticipant = { ...participant, id: newId };
+        participants.push(newParticipant);
+        await redis.set('sorteo:participants', participants);
+        return res.status(200).json({ ok: true, participant: newParticipant });
       }
-      if (winner !== undefined) {
-        if (winner === null) {
-          await redis.del('sorteo:winner');
-        } else {
-          await redis.set('sorteo:winner', winner);
+
+      if (action === 'draw') {
+        if (drawing !== undefined) await redis.set('sorteo:drawing', drawing);
+        if (winner !== undefined) {
+          if (winner === null) {
+            await redis.del('sorteo:winner');
+          } else {
+            await redis.set('sorteo:winner', winner);
+          }
         }
+        return res.status(200).json({ ok: true });
       }
 
-      return res.status(200).json({ ok: true });
+      return res.status(400).json({ error: 'Invalid action' });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

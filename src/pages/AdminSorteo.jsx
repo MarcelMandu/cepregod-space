@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY_PARTICIPANTS = 'cepregod_sorteo_participants';
 const ADMIN_KEY = 'CEPRE2026';
-
-function loadParticipants() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY_PARTICIPANTS)) || [];
-  } catch { return []; }
-}
 
 function maskPhone(phone) {
   if (!phone || phone.length <= 4) return phone || '';
@@ -24,18 +17,23 @@ export default function AdminSorteo() {
   const [winner, setWinner] = useState(null);
   const [showWinner, setShowWinner] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      setParticipants(loadParticipants());
-    }
-  }, [isAuthenticated]);
+  const fetchParticipants = useCallback(async () => {
+    try {
+      const res = await fetch('/api/sorteo');
+      const data = await res.json();
+      setParticipants(data.participants || []);
+    } catch {}
+  }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (isAuthenticated) setParticipants(loadParticipants());
-    }, 3000);
+    if (isAuthenticated) fetchParticipants();
+  }, [isAuthenticated, fetchParticipants]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const interval = setInterval(fetchParticipants, 3000);
     return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchParticipants]);
 
   const handleLogin = useCallback(() => {
     if (passwordInput.trim() === ADMIN_KEY) {
@@ -56,7 +54,7 @@ export default function AdminSorteo() {
       await fetch('/api/sorteo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ drawing: true, winner: null })
+        body: JSON.stringify({ action: 'draw', drawing: true, winner: null })
       });
     } catch {}
 
@@ -77,7 +75,7 @@ export default function AdminSorteo() {
           await fetch('/api/sorteo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ drawing: false, winner: w })
+            body: JSON.stringify({ action: 'draw', drawing: false, winner: w })
           });
         } catch {}
       }

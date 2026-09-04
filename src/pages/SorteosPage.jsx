@@ -1,22 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY_PARTICIPANTS = 'cepregod_sorteo_participants';
-const STORAGE_KEY_LAST_ID = 'cepregod_sorteo_lastId';
 const STORAGE_KEY_USER_HASH = 'cepregod_sorteo_userHash';
 const FOLLOWER_GOAL = 100;
 const WHATSAPP_URL = 'https://whatsapp.com/channel/0029Vb98c4E60eBiHsfPq73O';
-
-function loadParticipants() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY_PARTICIPANTS)) || [];
-  } catch { return []; }
-}
-
-function loadLastId() {
-  try {
-    return Number(localStorage.getItem(STORAGE_KEY_LAST_ID)) || 0;
-  } catch { return 0; }
-}
 
 function loadUserHash() {
   try {
@@ -39,8 +25,7 @@ function maskPhone(phone) {
 }
 
 export default function SorteosPage() {
-  const [participants, setParticipants] = useState(loadParticipants);
-  const [lastId, setLastId] = useState(loadLastId);
+  const [participants, setParticipants] = useState([]);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [ticketGenerated, setTicketGenerated] = useState(null);
@@ -49,31 +34,36 @@ export default function SorteosPage() {
   const [winner, setWinner] = useState(null);
   const [showWinner, setShowWinner] = useState(false);
   const [formError, setFormError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_PARTICIPANTS, JSON.stringify(participants));
-  }, [participants]);
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/sorteo');
+        const data = await res.json();
+        setParticipants(data.participants || []);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_LAST_ID, String(lastId));
-  }, [lastId]);
-
-  useEffect(() => {
-    const userHash = loadUserHash();
-    if (userHash) {
-      const saved = participants.find(p => p.hash === userHash);
-      if (saved) setTicketGenerated(saved);
-    }
+        const userHash = loadUserHash();
+        if (userHash && data.participants) {
+          const saved = data.participants.find(p => p.hash === userHash);
+          if (saved) setTicketGenerated(saved);
+        }
+      } catch {}
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
     const poll = async () => {
       try {
         const res = await fetch('/api/sorteo');
-        const { drawing, winner: apiWinner } = await res.json();
+        const { drawing, winner: apiWinner, participants: apiParticipants } = await res.json();
+
+        if (apiParticipants) setParticipants(apiParticipants);
 
         if (drawing && !isDrawing && !showWinner) {
-          const parts = loadParticipants();
+          const parts = apiParticipants || [];
           if (parts.length < 2) return;
           setIsDrawing(true);
           setShowWinner(false);
@@ -103,7 +93,7 @@ export default function SorteosPage() {
     return () => clearInterval(interval);
   }, [isDrawing, showWinner]);
 
-  const generateTicket = useCallback(() => {
+  const generateTicket = useCallback(async () => {
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
     if (!trimmedName || !trimmedPhone) {
@@ -116,6 +106,7 @@ export default function SorteosPage() {
     }
 
     const userHash = hashName(trimmedName, trimmedPhone);
+
     const existing = participants.find(p => p.hash === userHash);
     if (existing) {
       setTicketGenerated(existing);
@@ -124,22 +115,33 @@ export default function SorteosPage() {
       return;
     }
 
-    const newId = lastId + 1;
-    const ticket = {
-      id: newId,
-      name: trimmedName,
-      phone: trimmedPhone,
-      hash: userHash,
-      date: new Date().toISOString()
-    };
-    setParticipants(prev => [...prev, ticket]);
-    setLastId(newId);
-    setTicketGenerated(ticket);
-    localStorage.setItem(STORAGE_KEY_USER_HASH, userHash);
-    setFormError('');
-    setName('');
-    setPhone('');
-  }, [name, phone, lastId, participants]);
+    try {
+      const res = await fetch('/api/sorteo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'register',
+          participant: {
+            name: trimmedName,
+            phone: trimmedPhone,
+            hash: userHash,
+            date: new Date().toISOString()
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.ok && data.participant) {
+        setParticipants(prev => [...prev, data.participant]);
+        setTicketGenerated(data.participant);
+        localStorage.setItem(STORAGE_KEY_USER_HASH, userHash);
+        setFormError('');
+        setName('');
+        setPhone('');
+      }
+    } catch {
+      setFormError('Error al registrar. Intenta de nuevo.');
+    }
+  }, [name, phone, participants]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') generateTicket();
@@ -189,7 +191,7 @@ export default function SorteosPage() {
         </div>
       </div>
 
-      {!ticketGenerated && (
+      {!ticketGenerated && !loading && (
         <div className="sorteo-step">
           <div className="sorteo-step-number">2</div>
           <div className="sorteo-step-content">
