@@ -6,6 +6,7 @@ const links = [
   { path: '/rankings', label: 'RANKINGS' },
   { path: '/buscar', label: 'BUSCAR' },
   { path: '/posiciones', label: 'CARRERAS' },
+  { path: '/sorteos', label: 'SORTEOS' },
 ];
 
 export default function Navbar() {
