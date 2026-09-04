@@ -194,8 +194,8 @@ export default function Dashboard() {
       </div>
 
       <div className="eval-section-header">
-        <span className="eval-section-badge">ESTADÍSTICAS</span>
-        <h2 className="eval-section-title">Rendimiento y Estadísticas por Examen</h2>
+        <span className="eval-section-badge">📊 ESTADÍSTICAS</span>
+        <h2 className="eval-section-title">Rendimiento y Estadísticas por Examen 📈</h2>
         <p className="eval-section-desc">
           Análisis por fecha del examen: mejores puntajes, distribución e indicadores clave.
         </p>
@@ -203,33 +203,38 @@ export default function Dashboard() {
 
       <div className="eval-tabs-container">
         <div className="eval-tabs">
-          {exams.map(exam => (
-            <button
-              key={exam}
-              className={`eval-tab ${selectedExam === exam ? 'active' : ''}`}
-              onClick={() => setSelectedExam(exam)}
-            >
-              {exam}
-            </button>
-          ))}
+          {exams.map(exam => {
+            let emoji = '📝';
+            if (exam === 'EF') emoji = '🏆';
+            else if (exam.includes('EP')) emoji = '🎯';
+            return (
+              <button
+                key={exam}
+                className={`eval-tab ${selectedExam === exam ? 'active' : ''}`}
+                onClick={() => setSelectedExam(exam)}
+              >
+                {emoji} {exam}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="eval-metrics">
         <div className="eval-metric-card">
-          <span className="eval-metric-label">PROMEDIO GENERAL</span>
+          <span className="eval-metric-label">⚡ PROMEDIO GENERAL</span>
           <span className="eval-metric-value">{evalStats ? evalStats.avg.toFixed(2) : '—'}</span>
         </div>
         <div className="eval-metric-card">
-          <span className="eval-metric-label">PUNTAJE MÁXIMO</span>
+          <span className="eval-metric-label">🥇 PUNTAJE MÁXIMO</span>
           <span className="eval-metric-value eval-metric-success">{evalStats ? evalStats.max.toFixed(1) : '—'}</span>
         </div>
         <div className="eval-metric-card">
-          <span className="eval-metric-label">PUNTAJE MÍNIMO</span>
+          <span className="eval-metric-label">📉 PUNTAJE MÍNIMO</span>
           <span className="eval-metric-value eval-metric-danger">{evalStats ? evalStats.min.toFixed(1) : '—'}</span>
         </div>
         <div className="eval-metric-card">
-          <span className="eval-metric-label">TOTAL EVALUADOS</span>
+          <span className="eval-metric-label">👥 TOTAL EVALUADOS</span>
           <span className="eval-metric-value">{evalStats ? evalStats.count : '—'}</span>
         </div>
       </div>
@@ -244,7 +249,7 @@ export default function Dashboard() {
       </div>
 
       <div className="eval-top10">
-        <h3 className="eval-top10-title">TOP 10 — {selectedExam}</h3>
+        <h3 className="eval-top10-title">🔥 TOP 10 — {selectedExam}</h3>
         <div className="table-wrapper">
           <table className="eval-top10-table">
             <thead>
@@ -263,7 +268,9 @@ export default function Dashboard() {
                   className="eval-top10-row"
                   onClick={() => navigate(`/student/${s.codigo}`)}
                 >
-                  <td className="eval-td-puesto">{s.puesto}</td>
+                  <td className="eval-td-puesto">
+                    {s.puesto === 1 ? '🥇' : s.puesto === 2 ? '🥈' : s.puesto === 3 ? '🥉' : s.puesto}
+                  </td>
                   <td className="eval-td-codigo">{s.codigo}</td>
                   <td className="eval-td-nombre">{s.nombre}</td>
                   <td className={`eval-td-especialidad ${s.especialidad === 'ARQUITECTURA' ? 'esp-arq' : 'esp-ing'}`}>
