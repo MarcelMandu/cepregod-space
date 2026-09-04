@@ -363,6 +363,7 @@
 .hero-center {
   text-align: center;
   padding: 4.5rem 1rem 3.5rem;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 0, 51, 0.12) 0%, rgba(10, 10, 10, 0) 60%);
 }
 
 .hero-center-title {
