@@ -73,6 +73,8 @@ export default function Dashboard() {
         </p>
       </section>
 
+      <CountdownCard />
+
       <div className="ranking-card">
         <h3>Ranking General — Top 15</h3>
         <div className="table-wrapper">
@@ -190,8 +192,6 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
-
-      <CountdownCard />
 
       <div className="eval-tabs">
         {exams.map(exam => (
