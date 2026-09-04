@@ -362,7 +362,7 @@
 /* Hero */
 .hero-center {
   text-align: center;
-  padding: 3rem 1rem 2rem;
+  padding: 4.5rem 1rem 3.5rem;
 }
 
 .hero-center-title {
@@ -374,7 +374,7 @@
 }
 
 .hero-center-ciclo {
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: clamp(2.8rem, 8vw, 4.2rem);
   font-weight: 900;
   color: var(--text-main);
   line-height: 1.1;
@@ -382,7 +382,7 @@
 }
 
 .hero-center-cepre {
-  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-size: clamp(1.8rem, 5.5vw, 2.8rem);
   font-weight: 700;
   color: var(--accent-cyan);
   letter-spacing: 0.05em;
@@ -390,9 +390,9 @@
 }
 
 .hero-center-subtitle {
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: var(--text-muted);
-  max-width: 640px;
+  max-width: 720px;
   line-height: 1.5;
   margin: 0 auto 0.5rem;
 }
@@ -1860,19 +1860,19 @@
   }
 
   .hero-center {
-    padding: 2rem 0.8rem 1.5rem;
+    padding: 3rem 1rem 2rem;
   }
 
   .hero-center-ciclo {
-    font-size: 2.2rem;
+    font-size: 2.8rem;
   }
 
   .hero-center-cepre {
-    font-size: 1.4rem;
+    font-size: 1.9rem;
   }
 
   .hero-center-subtitle {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   .stats-panel {
