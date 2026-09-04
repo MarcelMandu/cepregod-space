@@ -4,7 +4,7 @@ const STORAGE_KEY_PARTICIPANTS = 'cepregod_sorteo_participants';
 const STORAGE_KEY_LAST_ID = 'cepregod_sorteo_lastId';
 const FOLLOWER_GOAL = 500;
 const CURRENT_FOLLOWERS = 320;
-const WHATSAPP_URL = 'https://whatsapp.com/channel/0029VaHfnU6JY8WU8fLdU83j';
+const WHATSAPP_URL = 'https://whatsapp.com/channel/0029Vb98c4E60eBiHsfPq73O';
 
 function loadParticipants() {
   try {
