@@ -431,10 +431,16 @@ export function processTables(tables) {
     }
     if (scores.length > 0) {
       const sum = scores.reduce((a, b) => a + b, 0);
+      scores.sort((a, b) => a - b);
+      const mid = Math.floor(scores.length / 2);
+      const median = scores.length % 2 !== 0
+        ? scores[mid]
+        : (scores[mid - 1] + scores[mid]) / 2;
       examStats[examName] = {
         avg: sum / scores.length,
         max: Math.max(...scores),
         min: Math.min(...scores),
+        median: median,
         count: scores.length,
       };
     }

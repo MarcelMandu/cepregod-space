@@ -230,8 +230,8 @@ export default function Dashboard() {
           <span className="eval-metric-value eval-metric-success">{evalStats ? evalStats.max.toFixed(1) : '—'}</span>
         </div>
         <div className="eval-metric-card">
-          <span className="eval-metric-label">📉 PUNTAJE MÍNIMO</span>
-          <span className="eval-metric-value eval-metric-danger">{evalStats ? evalStats.min.toFixed(1) : '—'}</span>
+          <span className="eval-metric-label">📊 NOTA MEDIANA</span>
+          <span className="eval-metric-value">{evalStats ? evalStats.median.toFixed(1) : '—'}</span>
         </div>
         <div className="eval-metric-card">
           <span className="eval-metric-label">👥 TOTAL EVALUADOS</span>
