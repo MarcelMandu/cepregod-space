@@ -193,33 +193,43 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="eval-tabs">
-        {exams.map(exam => (
-          <button
-            key={exam}
-            className={`eval-tab ${selectedExam === exam ? 'active' : ''}`}
-            onClick={() => setSelectedExam(exam)}
-          >
-            {exam}
-          </button>
-        ))}
+      <div className="eval-section-header">
+        <span className="eval-section-badge">ESTADÍSTICAS</span>
+        <h2 className="eval-section-title">Rendimiento y Estadísticas por Examen</h2>
+        <p className="eval-section-desc">
+          Análisis por fecha del examen: mejores puntajes, distribución e indicadores clave.
+        </p>
+      </div>
+
+      <div className="eval-tabs-container">
+        <div className="eval-tabs">
+          {exams.map(exam => (
+            <button
+              key={exam}
+              className={`eval-tab ${selectedExam === exam ? 'active' : ''}`}
+              onClick={() => setSelectedExam(exam)}
+            >
+              {exam}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="eval-metrics">
         <div className="eval-metric-card">
-          <span className="eval-metric-label">PROMEDIO</span>
+          <span className="eval-metric-label">PROMEDIO GENERAL</span>
           <span className="eval-metric-value">{evalStats ? evalStats.avg.toFixed(2) : '—'}</span>
         </div>
         <div className="eval-metric-card">
-          <span className="eval-metric-label">MÁXIMA</span>
+          <span className="eval-metric-label">PUNTAJE MÁXIMO</span>
           <span className="eval-metric-value eval-metric-success">{evalStats ? evalStats.max.toFixed(1) : '—'}</span>
         </div>
         <div className="eval-metric-card">
-          <span className="eval-metric-label">MÍNIMA</span>
+          <span className="eval-metric-label">PUNTAJE MÍNIMO</span>
           <span className="eval-metric-value eval-metric-danger">{evalStats ? evalStats.min.toFixed(1) : '—'}</span>
         </div>
         <div className="eval-metric-card">
-          <span className="eval-metric-label">EVALUADOS</span>
+          <span className="eval-metric-label">TOTAL EVALUADOS</span>
           <span className="eval-metric-value">{evalStats ? evalStats.count : '—'}</span>
         </div>
       </div>
