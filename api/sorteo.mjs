@@ -1,8 +1,8 @@
 import { Redis } from '@upstash/redis';
 
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  url: process.env.UPSTASH_REDIS_REST_URL || 'https://modern-molly-163476.upstash.io',
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAAAn6UAAIgcDFmNDBkMmJlOTQ3MTI0MTgwOTIwMGZlOTY4MDNhODJhOQ',
 });
 
 export default async function handler(req, res) {
