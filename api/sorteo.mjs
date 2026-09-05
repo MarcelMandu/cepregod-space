@@ -6,6 +6,10 @@ async function redisGet(key) {
     headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` }
   });
   const data = await res.json();
+  if (data.result === null || data.result === undefined) return null;
+  if (typeof data.result === 'string') {
+    try { return JSON.parse(data.result); } catch { return data.result; }
+  }
   return data.result;
 }
 
@@ -13,8 +17,7 @@ async function redisSet(key, value) {
   const res = await fetch(`${UPSTASH_URL}/set/${key}`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${UPSTASH_TOKEN}`,
-      'Content-Type': 'application/json'
+      'Authorization': `Bearer ${UPSTASH_TOKEN}`
     },
     body: JSON.stringify(value)
   });
