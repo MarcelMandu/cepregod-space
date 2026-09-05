@@ -247,6 +247,19 @@ export default function SorteosPage() {
         </div>
       )}
 
+      {ticketGenerated && (
+        <div className="sorteo-donation">
+          <p className="sorteo-donation-text">
+            ¡Ticket registrado con éxito! 🎉 Si la plataforma te es de ayuda
+            y deseas apoyar a sostener los servidores, puedes dejarnos un
+            Yape voluntario escaneando el QR.
+          </p>
+          <div className="sorteo-donation-qr">
+            <img src="/yape-qr.png" alt="Yape QR" />
+          </div>
+        </div>
+      )}
+
       {isDrawing && (
         <div className="sorteo-animation">
           <div className="sorteo-animation-label">🎲 SORTENANDO...</div>

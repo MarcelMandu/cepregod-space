@@ -3299,3 +3299,96 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== YAPE DONATION ===== */
+.sorteo-donation {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  margin-top: 1rem;
+  background: rgba(147, 51, 234, 0.06);
+  border: 1px solid rgba(147, 51, 234, 0.2);
+  border-radius: 16px;
+}
+
+.sorteo-donation-text {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.sorteo-donation-qr img {
+  max-width: 200px;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid rgba(147, 51, 234, 0.3);
+}
+
+/* ===== YAPE FAB BUTTON ===== */
+.yape-fab {
+  position: fixed;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 50px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  z-index: 900;
+  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.yape-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(147, 51, 234, 0.5);
+}
+
+/* ===== YAPE MODAL ===== */
+.yape-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.yape-modal-card {
+  background: #0a0a0a;
+  border: 2px solid #9333ea;
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  max-width: 350px;
+  width: 100%;
+  box-shadow: 0 0 40px rgba(147, 51, 234, 0.25);
+}
+
+.yape-modal-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.9rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.yape-modal-close:hover {
+  color: var(--text-primary);
+}
+
+.yape-modal-img {
+  width: 100%;
+  border-radius: 12px;
+}
