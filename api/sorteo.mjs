@@ -6,6 +6,10 @@ const redis = new Redis({
 });
 
 export default async function handler(req, res) {
+  console.log('Sorteo API:', req.method, JSON.stringify(req.body));
+  console.log('Redis URL defined:', !!process.env.UPSTASH_REDIS_REST_URL);
+  console.log('Redis Token defined:', !!process.env.UPSTASH_REDIS_REST_TOKEN);
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

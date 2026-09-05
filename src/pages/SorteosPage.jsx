@@ -137,9 +137,11 @@ export default function SorteosPage() {
         setFormError('');
         setName('');
         setPhone('');
+      } else {
+        setFormError(data.error || 'Error al registrar.');
       }
-    } catch {
-      setFormError('Error al registrar. Intenta de nuevo.');
+    } catch (e) {
+      setFormError('Error de conexión: ' + e.message);
     }
   }, [name, phone, participants]);
 
