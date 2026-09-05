@@ -89,7 +89,7 @@ export default function SorteosPage() {
       } catch {}
     };
 
-    const interval = setInterval(poll, 2000);
+    const interval = setInterval(poll, 30000);
     return () => clearInterval(interval);
   }, [isDrawing, showWinner]);
 

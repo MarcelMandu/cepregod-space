@@ -31,7 +31,7 @@ export default function AdminSorteo() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const interval = setInterval(fetchParticipants, 3000);
+    const interval = setInterval(fetchParticipants, 10000);
     return () => clearInterval(interval);
   }, [isAuthenticated, fetchParticipants]);
 
