@@ -1,5 +1,5 @@
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || 'https://modern-molly-163476.upstash.io';
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAAAn6UAAIgcDFmNDBkMmJlOTQ3MTI0MTgwOTIwMGZlOTY4MDNhODJhOQ';
+const UPSTASH_URL = 'https://modern-molly-163476.upstash.io';
+const UPSTASH_TOKEN = 'gQAAAAAAAn6UAAIgcDFmNDBkMmJlOTQ3MTI0MTgwOTIwMGZlOTY4MDNhODJhOQ';
 
 async function redisGet(key) {
   const res = await fetch(`${UPSTASH_URL}/get/${key}`, {
