@@ -1,15 +1,34 @@
-import { Redis } from '@upstash/redis';
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || 'https://modern-molly-163476.upstash.io';
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAAAn6UAAIgcDFmNDBkMmJlOTQ3MTI0MTgwOTIwMGZlOTY4MDNhODJhOQ';
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || 'https://modern-molly-163476.upstash.io',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAAAn6UAAIgcDFmNDBkMmJlOTQ3MTI0MTgwOTIwMGZlOTY4MDNhODJhOQ',
-});
+async function redisGet(key) {
+  const res = await fetch(`${UPSTASH_URL}/get/${key}`, {
+    headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` }
+  });
+  const data = await res.json();
+  return data.result;
+}
+
+async function redisSet(key, value) {
+  const res = await fetch(`${UPSTASH_URL}/set/${key}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(value)
+  });
+  return res.json();
+}
+
+async function redisDel(key) {
+  const res = await fetch(`${UPSTASH_URL}/del/${key}`, {
+    headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` }
+  });
+  return res.json();
+}
 
 export default async function handler(req, res) {
-  console.log('Sorteo API:', req.method, JSON.stringify(req.body));
-  console.log('Redis URL defined:', !!process.env.UPSTASH_REDIS_REST_URL);
-  console.log('Redis Token defined:', !!process.env.UPSTASH_REDIS_REST_TOKEN);
-
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -20,9 +39,9 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const drawing = await redis.get('sorteo:drawing');
-      const winner = await redis.get('sorteo:winner');
-      const participants = (await redis.get('sorteo:participants')) || [];
+      const drawing = await redisGet('sorteo:drawing');
+      const winner = await redisGet('sorteo:winner');
+      const participants = await redisGet('sorteo:participants') || [];
       return res.status(200).json({
         drawing: !!drawing,
         winner: winner || null,
@@ -34,21 +53,21 @@ export default async function handler(req, res) {
       const { action, participant, drawing, winner } = req.body;
 
       if (action === 'register' && participant) {
-        const participants = (await redis.get('sorteo:participants')) || [];
+        const participants = await redisGet('sorteo:participants') || [];
         const newId = participants.length > 0 ? participants[participants.length - 1].id + 1 : 1;
         const newParticipant = { ...participant, id: newId };
         participants.push(newParticipant);
-        await redis.set('sorteo:participants', participants);
+        await redisSet('sorteo:participants', participants);
         return res.status(200).json({ ok: true, participant: newParticipant });
       }
 
       if (action === 'draw') {
-        if (drawing !== undefined) await redis.set('sorteo:drawing', drawing);
+        if (drawing !== undefined) await redisSet('sorteo:drawing', drawing);
         if (winner !== undefined) {
           if (winner === null) {
-            await redis.del('sorteo:winner');
+            await redisDel('sorteo:winner');
           } else {
-            await redis.set('sorteo:winner', winner);
+            await redisSet('sorteo:winner', winner);
           }
         }
         return res.status(200).json({ ok: true });
